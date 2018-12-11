@@ -32,6 +32,10 @@
 ;;;; Userland
 ;;;;; Variable
 
+(defface eglot-doc-border '((((background dark)) . (:background "white"))
+                            (((background light)) . (:background "dark")))
+  "The border color used in childframe.")
+
 (defvar eglot-doc-frame-parameters
   '(
     ;; (left . -1)
@@ -138,6 +142,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
          (main-frame (selected-frame)))
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
+    (set-face-attribute 'internal-border frame :inherit 'eglot-doc-border)
     ;; set size
     (let* ((size
             (window-text-pixel-size
