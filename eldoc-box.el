@@ -66,7 +66,7 @@
     (unsplittable . t)
     (undecorated . t)
     ;; (top . -1)
-    ;; (visibility . nil)
+    (visibility . nil)
     (mouse-wheel-frame . nil)
     (no-other-frame . t)
     (cursor-type . nil)
