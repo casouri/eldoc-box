@@ -74,7 +74,10 @@
 (defun eldoc-box-help-at-point ()
   "Display hover info at point in a childframe."
   (interactive)
-  (eldoc-message (funcall eldoc-documentation-function)))
+  (let ((doc (funcall eldoc-documentation-function)))
+    (when doc
+      (eldoc-box--display doc)
+      (eldoc-box--inject-quit-func))))
 
 (defun eldoc-box-quit-frame ()
   "Hide childframe used by eglot doc."
@@ -101,8 +104,7 @@
       (setq mode-line-format nil)
       (erase-buffer)
       (insert str)
-      (eldoc-box--get-frame doc-buffer))
-    (eldoc-box--inject-quit-func)))
+      (eldoc-box--get-frame doc-buffer))))
 
 (defun eldoc-box-quit-hook ()
   "Quit eglot doc childframe and remove self from hook."
