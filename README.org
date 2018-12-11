@@ -1,0 +1,10 @@
+* Install
+Get the file, add to load path, and
+#+BEGIN_SRC emacs-lisp
+(require 'eglot-doc)
+#+END_SRC
+
+* Usage
+Show the documentation of the symbol at point: =eglot-doc-help-at-point=
+
+Show documentation upon hover: =eglot-doc-hover-mode=. Note that you need to enable ElDoc mode for this to work.
