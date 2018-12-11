@@ -26,7 +26,7 @@
 ;;;;; Variable
 
 (defface eldoc-box-border '((((background dark)) . (:background "white"))
-                            (((background light)) . (:background "dark")))
+                            (((background light)) . (:background "black")))
   "The border color used in childframe.")
 
 (defface eldoc-box-body '((t . (:background nil)))
