@@ -8,3 +8,5 @@ Get the file, add to load path, and
 Show the documentation of the symbol at point: =eglot-doc-help-at-point=
 
 Show documentation upon hover: =eglot-doc-hover-mode=. Note that you need to enable ElDoc mode for this to work.
+
+Adjust =:background= of =eglot-doc-border= face for border color. Adjust =:background= of =eglot-doc-body= face for background color of childframe.
