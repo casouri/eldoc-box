@@ -7,11 +7,11 @@ Get the file, add to load path, and
 #+END_SRC
 
 * Usage
-Show the documentation of the symbol at point: =eldoc-box-help-at-point=
-
-Show documentation upon hover: =eldoc-box-hover-mode=. Note that you need to enable ElDoc mode for this to work.
-
-Adjust =:background= of =eldoc-box-border= face for border color. Adjust =:background= of =eldoc-box-body= face for background color of childframe.
+-  =eldoc-box-help-at-point= :: Show the documentation of the symbol at point.
+- =eldoc-box-hover-mode= :: Show documentation upon hover. Note that you need to enable ElDoc mode for this to work.
+-  =eldoc-box-border= :: Adjust =:background= of this face for border color.
+- =eldoc-box-body= :: Adjust =:background= of  this face for background color of childframe.
+- =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
 
 ** Use with eglot
 As of writing this README, eglot doesn't have a public mode hook, use this hook:

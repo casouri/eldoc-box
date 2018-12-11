@@ -39,6 +39,9 @@
 (defface eldoc-box-body '((t . (:background nil)))
   "Body face used in eglot doc childframe. Only :background is used.")
 
+(defvar eldoc-box-only-multi-line nil
+  "If non-nil, only use childframe when there are more than one line.")
+
 (defvar eldoc-box-frame-parameters
   '(
     ;; (left . -1)
@@ -169,7 +172,10 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
   "Frontend for eldoc. Display STR in childframe and ARGS works like `message'."
   (when str
     (eldoc-box-quit-frame)
-    (eldoc-box--display (apply #'format str args))))
+    (let ((doc (apply #'format str args)))
+      (if (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
+          (apply #'eldoc-minibuffer-message str args)
+        (eldoc-box--display (apply #'format str args))))))
 
 (define-minor-mode eldoc-box-hover-mode
   "Displays hover documentations in a childframe. This mode is buffer local."
