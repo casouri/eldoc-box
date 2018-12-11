@@ -179,7 +179,10 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
       (setq-local eldoc-message-function #'eldoc-box--eldoc-message-function)
-    (setq-local eldoc-message-function #'eldoc-minibuffer-message)))
+    (setq-local eldoc-message-function #'eldoc-minibuffer-message)
+    ;; if minor mode is turned off when childframe is visible
+    ;; hide it
+    (eldoc-box-quit-frame)))
 
 (provide 'eldoc-box)
 
