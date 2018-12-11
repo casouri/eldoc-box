@@ -89,9 +89,11 @@
   "Display hover info at point in a childframe."
   (interactive)
   (let ((doc (funcall eldoc-documentation-function)))
-    (when doc
-      (eldoc-box--display doc)
-      (eldoc-box--inject-quit-func))))
+    (if doc
+        (progn
+          (eldoc-box--display doc)
+          (eldoc-box--inject-quit-func))
+      (message "No documentation available"))))
 
 (defun eldoc-box-quit-frame ()
   "Hide childframe used by eglot doc."
