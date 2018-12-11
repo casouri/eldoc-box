@@ -78,11 +78,7 @@
 (defun eglot-doc-help-at-point ()
   "Display hover info at point in a childframe."
   (interactive)
-  (eglot--dbind ((Hover) contents range)
-      (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
-                       (eglot--TextDocumentPositionParams))
-    (when (seq-empty-p contents) (eglot--error "No hover info here"))
-    (eglot-doc--display (eglot--hover-info contents range))))
+  (eldoc-message (funcall eldoc-documentation-function)))
 
 (defun eglot-doc-quit-frame ()
   "Hide childframe used by eglot doc."
