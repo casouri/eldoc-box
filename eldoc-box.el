@@ -29,6 +29,8 @@
 ;;; Code:
 ;;
 
+(require 'cl-lib)
+
 ;;;; Userland
 ;;;;; Variable
 
