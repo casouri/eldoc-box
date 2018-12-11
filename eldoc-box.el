@@ -130,11 +130,13 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                             `((default-minibuffer-frame . ,(selected-frame))
                               (minibuffer . ,(minibuffer-window))
                               (left-fringe . ,(frame-char-width)))))
-         (window (display-buffer-in-child-frame
-                  buffer
-                  `((child-frame-parameters . ,parameter))))
+         (window (or (and eldoc-box--frame (frame-selected-window eldoc-box--frame))
+                     (display-buffer-in-child-frame
+                      buffer
+                      `((child-frame-parameters . ,parameter)))))
          (frame (window-frame window))
          (main-frame (selected-frame)))
+    (make-frame-visible frame)
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
     (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
@@ -163,11 +165,12 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
 ;;;;; ElDoc
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Frontend for eldoc. Display STR in childframe and ARGS works like `message'."
-  (when (stringp str)
-    (let ((doc (apply #'format str args)))
-      (if (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
-          (apply #'eldoc-minibuffer-message str args)
-        (eldoc-box--display (apply #'format str args))))))
+  (if (stringp str)
+      (let ((doc (apply #'format str args)))
+        (if (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
+            (apply #'eldoc-minibuffer-message str args)
+          (eldoc-box--display (apply #'format str args))))
+    (eldoc-box-quit-frame)))
 
 (define-minor-mode eldoc-box-hover-mode
   "Displays hover documentations in a childframe. This mode is buffer local."
