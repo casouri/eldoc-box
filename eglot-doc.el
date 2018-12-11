@@ -159,13 +159,13 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
            (frame-resize-pixelwise t))
       (set-frame-size frame width height t)
       ;; move position
-      (set-frame-position frame (pcase (eglot-doc--window-side) ; x position
+      (set-frame-position frame (pcase (eglot-doc--window-side) ; x position + a little padding (16)
                                   ;; display doc on right
-                                  ('left (- (frame-outer-width main-frame) width))
+                                  ('left (- (frame-outer-width main-frame) width 16))
                                   ;; display doc on left
-                                  ('right 0))
-                          ;; y position
-                          0))
+                                  ('right 16))
+                          ;; y position + a little padding (16)
+                          16))
     (setq eglot-doc--frame frame)))
 
 ;;;;; ElDoc
