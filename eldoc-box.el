@@ -2,7 +2,10 @@
 
 ;; Copyright (C) 2018  Yuan Fu
 
+;; Version: 1.0
 ;; Author: Yuan Fu <casouri@gmail.com>
+;; URL: https://github.com/casouri/eldoc-box
+;; Package-Requires: ((emacs "26.1"))
 
 ;;; This file is NOT part of GNU Emacs
 
