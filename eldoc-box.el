@@ -93,7 +93,7 @@
   (interactive)
   ;; TODO
   (when eldoc-box--frame
-    (delete-frame eldoc-box--frame t)))
+    (make-frame-invisible eldoc-box--frame t)))
 
 ;;;; Backstage
 ;;;;; Variable
