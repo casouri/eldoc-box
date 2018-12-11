@@ -12,3 +12,10 @@ Show the documentation of the symbol at point: =eldoc-box-help-at-point=
 Show documentation upon hover: =eldoc-box-hover-mode=. Note that you need to enable ElDoc mode for this to work.
 
 Adjust =:background= of =eldoc-box-border= face for border color. Adjust =:background= of =eldoc-box-body= face for background color of childframe.
+
+** Use with eglot
+As of writing this README, eglot doesn't have a public mode hook, use this hook:
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
+#+END_SRC
