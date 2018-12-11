@@ -1,4 +1,4 @@
-;;; eglot-doc.el --- Display documentation in childframe      -*- lexical-binding: t; -*-
+;;; eldoc-box.el --- Display documentation in childframe      -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Yuan Fu
 
@@ -32,14 +32,14 @@
 ;;;; Userland
 ;;;;; Variable
 
-(defface eglot-doc-border '((((background dark)) . (:background "white"))
+(defface eldoc-box-border '((((background dark)) . (:background "white"))
                             (((background light)) . (:background "dark")))
   "The border color used in childframe.")
 
-(defface eglot-doc-body '((t . (:background nil)))
+(defface eldoc-box-body '((t . (:background nil)))
   "Body face used in eglot doc childframe. Only :background is used.")
 
-(defvar eglot-doc-frame-parameters
+(defvar eldoc-box-frame-parameters
   '(
     ;; (left . -1)
     (no-accept-focus . t)
@@ -68,56 +68,56 @@
     (desktop-dont-save . t))
   "Frame parameters used to create the frame.")
 
-(defvar eglot-doc-max-pixel-width 800
+(defvar eldoc-box-max-pixel-width 800
   "Maximum width of doc childframw in pixel.")
-(defvar eglot-doc-max-pixel-height 1400
+(defvar eldoc-box-max-pixel-height 1400
   "Maximum height of doc childframw in pixel.")
 
 ;;;;; Function
 
-(defun eglot-doc-help-at-point ()
+(defun eldoc-box-help-at-point ()
   "Display hover info at point in a childframe."
   (interactive)
   (eldoc-message (funcall eldoc-documentation-function)))
 
-(defun eglot-doc-quit-frame ()
+(defun eldoc-box-quit-frame ()
   "Hide childframe used by eglot doc."
   (interactive)
   ;; TODO
-  (when eglot-doc--frame
-    (delete-frame eglot-doc--frame t)))
+  (when eldoc-box--frame
+    (delete-frame eldoc-box--frame t)))
 
 ;;;; Backstage
 ;;;;; Variable
 
-(defvar eglot-doc--frame nil
+(defvar eldoc-box--frame nil
   "The frame to display doc.")
 
-(defvar eglot-doc--buffer "*eglot-doc*"
+(defvar eldoc-box--buffer "*eldoc-box*"
   "The buffer used to display eglot doc.")
 
 ;;;;; Function
 
-(defun eglot-doc--display (str)
+(defun eldoc-box--display (str)
   "Display STR in childframe."
-  (let ((doc-buffer (get-buffer-create eglot-doc--buffer)))
+  (let ((doc-buffer (get-buffer-create eldoc-box--buffer)))
     (with-current-buffer doc-buffer
       (setq mode-line-format nil)
       (erase-buffer)
       (insert str)
-      (eglot-doc--get-frame doc-buffer))
-    (eglot-doc--inject-quit-func)))
+      (eldoc-box--get-frame doc-buffer))
+    (eldoc-box--inject-quit-func)))
 
-(defun eglot-doc-quit-hook ()
+(defun eldoc-box-quit-hook ()
   "Quit eglot doc childframe and remove self from hook."
-  (eglot-doc-quit-frame)
-  (remove-hook 'pre-command-hook #'eglot-doc-quit-hook t))
+  (eldoc-box-quit-frame)
+  (remove-hook 'pre-command-hook #'eldoc-box-quit-hook t))
 
-(defun eglot-doc--inject-quit-func ()
+(defun eldoc-box--inject-quit-func ()
   "Inject quit function into `pre-command-hook' so doing anything will quit eglot doc childframe."
-  (add-hook 'pre-command-hook #'eglot-doc-quit-hook t t))
+  (add-hook 'pre-command-hook #'eldoc-box-quit-hook t t))
 
-(defun eglot-doc--window-side ()
+(defun eldoc-box--window-side ()
   "Return 'left if the selected window is on the left,
 'right if on the right. Return 'left if there is only one window."
   (let ((left-window(window-at 0 0)))
@@ -125,12 +125,12 @@
         'left
       'right)))
 
-(defun eglot-doc--get-frame (buffer)
+(defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
 Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
   (let* ((after-make-frame-functions nil)
          (before-make-frame-hook nil)
-         (parameter (append eglot-doc-frame-parameters
+         (parameter (append eldoc-box-frame-parameters
                             `((default-minibuffer-frame . ,(selected-frame))
                               (minibuffer . ,(minibuffer-window))
                               (left-fringe . ,(frame-char-width)))))
@@ -141,43 +141,43 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
          (main-frame (selected-frame)))
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
-    (set-face-attribute 'internal-border frame :inherit 'eglot-doc-border)
-    (set-face-attribute 'default frame :background (face-attribute 'eglot-doc-body :background main-frame))
+    (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
+    (set-face-attribute 'default frame :background (face-attribute 'eldoc-box-body :background main-frame))
     ;; set size
     (let* ((size
             (window-text-pixel-size
              window nil nil
-             eglot-doc-max-pixel-width
-             eglot-doc-max-pixel-height t))
+             eldoc-box-max-pixel-width
+             eldoc-box-max-pixel-height t))
            (width (car size))
            (height (cdr size))
            (width (+ width (frame-char-width frame))) ; add margin
            (frame-resize-pixelwise t))
       (set-frame-size frame width height t)
       ;; move position
-      (set-frame-position frame (pcase (eglot-doc--window-side) ; x position + a little padding (16)
+      (set-frame-position frame (pcase (eldoc-box--window-side) ; x position + a little padding (16)
                                   ;; display doc on right
                                   ('left (- (frame-outer-width main-frame) width 16))
                                   ;; display doc on left
                                   ('right 16))
                           ;; y position + a little padding (16)
                           16))
-    (setq eglot-doc--frame frame)))
+    (setq eldoc-box--frame frame)))
 
 ;;;;; ElDoc
-(defun eglot-doc--eldoc-message-function (str &rest args)
+(defun eldoc-box--eldoc-message-function (str &rest args)
   "Frontend for eldoc. Display STR in childframe and ARGS works like `message'."
   (when str
-    (eglot-doc-quit-frame)
-    (eglot-doc--display (apply #'format str args))))
+    (eldoc-box-quit-frame)
+    (eldoc-box--display (apply #'format str args))))
 
-(define-minor-mode eglot-doc-hover-mode
+(define-minor-mode eldoc-box-hover-mode
   "Displays hover documentations in a childframe. This mode is buffer local."
-  :lighter " EGLOT-DOC"
-  (if eglot-doc-hover-mode
-      (setq-local eldoc-message-function #'eglot-doc--eldoc-message-function)
+  :lighter " ELDOC-BOX"
+  (if eldoc-box-hover-mode
+      (setq-local eldoc-message-function #'eldoc-box--eldoc-message-function)
     (setq-local eldoc-message-function #'eldoc-minibuffer-message)))
 
-(provide 'eglot-doc)
+(provide 'eldoc-box)
 
-;;; eglot-doc.el ends here
+;;; eldoc-box.el ends here
