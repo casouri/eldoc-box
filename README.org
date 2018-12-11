@@ -1,12 +1,14 @@
+This package displays ElDoc documentations in a childframe.
+
 * Install
 Get the file, add to load path, and
 #+BEGIN_SRC emacs-lisp
-(require 'eglot-doc)
+(require 'eldoc-box)
 #+END_SRC
 
 * Usage
-Show the documentation of the symbol at point: =eglot-doc-help-at-point=
+Show the documentation of the symbol at point: =eldoc-box-help-at-point=
 
-Show documentation upon hover: =eglot-doc-hover-mode=. Note that you need to enable ElDoc mode for this to work.
+Show documentation upon hover: =eldoc-box-hover-mode=. Note that you need to enable ElDoc mode for this to work.
 
-Adjust =:background= of =eglot-doc-border= face for border color. Adjust =:background= of =eglot-doc-body= face for background color of childframe.
+Adjust =:background= of =eldoc-box-border= face for border color. Adjust =:background= of =eldoc-box-body= face for background color of childframe.
