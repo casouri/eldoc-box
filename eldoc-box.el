@@ -181,6 +181,23 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     (setq eldoc-box--frame frame)))
 
 ;;;;; ElDoc
+(defvar eldoc-box--cleanup-timer nil
+  "The timer used to cleanup childframe after ElDoc.")
+
+(defun eldoc-box--maybe-cleanup ()
+  "Clean up after ElDOc."
+  ;; timer is global, so this function will be called outside
+  ;; the buffer with `eldoc-box-hover-mode' enabled
+  (if eldoc-box-hover-mode
+      ;; if eldoc-last-message is nil, the childframe is cleared
+      (eldoc-box--eldoc-message-function eldoc-last-message)
+    ;; sometimes you switched buffer when childframe is on.
+    ;; it wouldn't go away unless you goes back and let eldoc
+    ;; shut it off. this code can save you
+    ;; this is gold, right here, you know it my friend?
+    (when (frame-parameter eldoc-box--frame 'visibility)
+      (eldoc-box-quit-frame))))
+
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Frontend for eldoc. Display STR in childframe and ARGS works like `message'."
   (if (stringp str)
@@ -194,11 +211,18 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
   "Displays hover documentations in a childframe. This mode is buffer local."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
-      (setq-local eldoc-message-function #'eldoc-box--eldoc-message-function)
+      (progn
+        ;; Why a timer? ElDoc is mainly use in minibuffer,
+        ;; where the text is constantly being flushed by other commands
+        ;; so ElDoc doesn't try very hard to cleanup
+        (setq eldoc-box--cleanup-timer (run-with-idle-timer 1 t #'eldoc-box--maybe-cleanup))
+        (setq-local eldoc-message-function #'eldoc-box--eldoc-message-function))
     (setq-local eldoc-message-function #'eldoc-minibuffer-message)
+    (when eldoc-box--cleanup-timer (cancel-timer eldoc-box--cleanup-timer))
     ;; if minor mode is turned off when childframe is visible
     ;; hide it
     (eldoc-box-quit-frame)))
+
 
 (provide 'eldoc-box)
 
