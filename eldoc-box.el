@@ -1,11 +1,11 @@
 ;;; eldoc-box.el --- Display documentation in childframe      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017 Sebastien Chapuis
+;; Copyright (C) 2017-2018 Sebastien Chapuis, 2018 Yuan Fu
 
 ;; Version: 1.0
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
-;; Yuan Fu <casouri@gmail.com> made a lot of change to use it for ElDoc
+;; Maintainer: Yuan Fu <casouri@gmail.com>
 ;; URL: https://github.com/casouri/eldoc-box
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -30,6 +30,7 @@
 
 ;;; Commentary:
 ;;
+;;  Made a lot of change to use it for ElDoc
 
 ;;; Code:
 ;;
