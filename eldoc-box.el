@@ -212,10 +212,10 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
   "Frontend for eldoc. Display STR in childframe and ARGS works like `message'."
   (if (stringp str)
       (let ((doc (apply #'format str args)))
-        (if (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
-            (apply #'eldoc-minibuffer-message str args)
+        (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
           (eldoc-box--display (apply #'format str args))))
-    (eldoc-box-quit-frame)))
+    (eldoc-box-quit-frame)
+    t))
 
 (define-minor-mode eldoc-box-hover-mode
   "Displays hover documentations in a childframe. This mode is buffer local."
@@ -228,8 +228,9 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
         (unless eldoc-box--cleanup-timer
           (setq eldoc-box--cleanup-timer (run-with-idle-timer 1 t #'eldoc-box--maybe-cleanup)))
         (add-to-list 'eldoc-box--enabled-buffer-list (current-buffer))
-        (setq-local eldoc-message-function #'eldoc-box--eldoc-message-function))
-    (setq-local eldoc-message-function #'eldoc-minibuffer-message)
+        (add-function :before-until (local 'eldoc-message-function)
+                      #'eldoc-box--eldoc-message-function))
+    (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
     (delete (current-buffer) eldoc-box--enabled-buffer-list)
     ;; this function has to be called after the current buffer is
     ;; removed from buffer list
