@@ -196,24 +196,21 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     ;; shut it off. this code can save you
     ;; this is gold, right here, you know it my friend?
     (when (frame-parameter eldoc-box--frame 'visibility)
-      (eldoc-box-quit-frame))))
-
-(defvar eldoc-box--enabled-buffer-list nil
-  "A list of buffers that enabled `eldoc-box-hover-mode'.")
-
-(defun eldoc-box--maybe-cancel-timer ()
-  "Cancel `eldoc-box--cleanup-timer' there is no live buffer with `eldoc-box-hover-mode' enabled left."
-  (when (and eldoc-box--cleanup-timer
-             (eq (cl-count-if #'buffer-live-p eldoc-box--enabled-buffer-list) 0))
-    (cancel-timer eldoc-box--cleanup-timer)
-    (setq eldoc-box--cleanup-timer nil)))
+      (eldoc-box-quit-frame)))
+  (setq eldoc-box--cleanup-timer nil))
 
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Frontend for eldoc. Display STR in childframe and ARGS works like `message'."
   (if (stringp str)
       (let ((doc (apply #'format str args)))
         (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
-          (eldoc-box--display (apply #'format str args))))
+          (eldoc-box--display (apply #'format str args))
+          ;; Why a timer? ElDoc is mainly use in minibuffer,
+          ;; where the text is constantly being flushed by other commands
+          ;; so ElDoc doesn't try very hard to cleanup
+          (when eldoc-box--cleanup-timer (cancel-timer eldoc-box--cleanup-timer))
+          (setq eldoc-box--cleanup-timer
+                (run-with-timer 1 nil #'eldoc-box--maybe-cleanup))))
     (eldoc-box-quit-frame)
     t))
 
@@ -221,20 +218,9 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
   "Displays hover documentations in a childframe. This mode is buffer local."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
-      (progn
-        ;; Why a timer? ElDoc is mainly use in minibuffer,
-        ;; where the text is constantly being flushed by other commands
-        ;; so ElDoc doesn't try very hard to cleanup
-        (unless eldoc-box--cleanup-timer
-          (setq eldoc-box--cleanup-timer (run-with-idle-timer 1 t #'eldoc-box--maybe-cleanup)))
-        (add-to-list 'eldoc-box--enabled-buffer-list (current-buffer))
-        (add-function :before-until (local 'eldoc-message-function)
-                      #'eldoc-box--eldoc-message-function))
+      (add-function :before-until (local 'eldoc-message-function)
+                    #'eldoc-box--eldoc-message-function)
     (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
-    (delete (current-buffer) eldoc-box--enabled-buffer-list)
-    ;; this function has to be called after the current buffer is
-    ;; removed from buffer list
-    (eldoc-box--maybe-cancel-timer)
     ;; if minor mode is turned off when childframe is visible
     ;; hide it
     (eldoc-box-quit-frame)))
