@@ -200,30 +200,32 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
   "The timer used to cleanup childframe after ElDoc.")
 
 (defun eldoc-box--maybe-cleanup ()
-  "Clean up after ElDOc."
+  "Clean up after ElDoc."
   ;; timer is global, so this function will be called outside
   ;; the buffer with `eldoc-box-hover-mode' enabled
   (if eldoc-box-hover-mode
       ;; if eldoc-last-message is nil, the childframe is cleared
       (eldoc-box--eldoc-message-function eldoc-last-message)
     ;; sometimes you switched buffer when childframe is on.
-    ;; it wouldn't go away unless you goes back and let eldoc
-    ;; shut it off. this code can save you
-    ;; this is gold, right here, you know it my friend?
+    ;; it wouldn't go away unless you goes back and let eldoc shut it off.
+    ;; if childframe is visible and we are not in `eldoc-box-hover-mode', hide childframe
     (when (frame-parameter eldoc-box--frame 'visibility)
       (eldoc-box-quit-frame)))
   (setq eldoc-box--cleanup-timer nil))
 
 (defun eldoc-box--eldoc-message-function (str &rest args)
-  "Frontend for eldoc. Display STR in childframe and ARGS works like `message'."
+  "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
   (if (stringp str)
       (let ((doc (apply #'format str args)))
         (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
-          (eldoc-box--display (apply #'format str args))
+          (eldoc-box--display doc)
           ;; Why a timer? ElDoc is mainly use in minibuffer,
           ;; where the text is constantly being flushed by other commands
           ;; so ElDoc doesn't try very hard to cleanup
           (when eldoc-box--cleanup-timer (cancel-timer eldoc-box--cleanup-timer))
+          ;; this function is also called by `eldoc-pre-command-refresh-echo-area'
+          ;; in `pre-command-hook', which means the timer is reset before every
+          ;; command if `eldoc-box-hover-mode' is on and `eldoc-last-message' is not nil.
           (setq eldoc-box--cleanup-timer
                 (run-with-timer 1 nil #'eldoc-box--maybe-cleanup))))
     (eldoc-box-quit-frame)
