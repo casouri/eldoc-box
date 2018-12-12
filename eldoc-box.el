@@ -38,6 +38,10 @@
 
 ;;;; Userland
 ;;;;; Variable
+(defgroup eldoc-box nil
+  "Display Eldoc docs in a pretty child frame."
+  :prefix "eldoc-box-"
+  :group 'eldoc)
 
 (defface eldoc-box-border '((((background dark)) . (:background "white"))
                             (((background light)) . (:background "black")))
@@ -95,6 +99,9 @@
           (eldoc-box--inject-quit-func))
       (message "No documentation available"))))
 
+(defvar eldoc-box--frame nil ;; A backstage variable
+  "The frame to display doc.")
+
 (defun eldoc-box-quit-frame ()
   "Hide childframe used by eglot doc."
   (interactive)
@@ -104,10 +111,6 @@
 
 ;;;; Backstage
 ;;;;; Variable
-
-(defvar eldoc-box--frame nil
-  "The frame to display doc.")
-
 (defvar eldoc-box--buffer "*eldoc-box*"
   "The buffer used to display eglot doc.")
 
@@ -181,6 +184,17 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     (setq eldoc-box--frame frame)))
 
 ;;;;; ElDoc
+(define-minor-mode eldoc-box-hover-mode
+  "Displays hover documentations in a childframe. This mode is buffer local."
+  :lighter " ELDOC-BOX"
+  (if eldoc-box-hover-mode
+      (add-function :before-until (local 'eldoc-message-function)
+                    #'eldoc-box--eldoc-message-function)
+    (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
+    ;; if minor mode is turned off when childframe is visible
+    ;; hide it
+    (eldoc-box-quit-frame)))
+
 (defvar eldoc-box--cleanup-timer nil
   "The timer used to cleanup childframe after ElDoc.")
 
@@ -213,18 +227,6 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                 (run-with-timer 1 nil #'eldoc-box--maybe-cleanup))))
     (eldoc-box-quit-frame)
     t))
-
-(define-minor-mode eldoc-box-hover-mode
-  "Displays hover documentations in a childframe. This mode is buffer local."
-  :lighter " ELDOC-BOX"
-  (if eldoc-box-hover-mode
-      (add-function :before-until (local 'eldoc-message-function)
-                    #'eldoc-box--eldoc-message-function)
-    (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
-    ;; if minor mode is turned off when childframe is visible
-    ;; hide it
-    (eldoc-box-quit-frame)))
-
 
 (provide 'eldoc-box)
 
