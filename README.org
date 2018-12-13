@@ -14,6 +14,7 @@ Get the file, add to load path, and
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Adjust =:background= of  this face for background color of childframe.
 ** Variable
+- =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
 
 ** Use with eglot

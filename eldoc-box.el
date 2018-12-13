@@ -84,9 +84,12 @@
   "Frame parameters used to create the frame.")
 
 (defvar eldoc-box-max-pixel-width 800
-  "Maximum width of doc childframw in pixel.")
-(defvar eldoc-box-max-pixel-height 1400
-  "Maximum height of doc childframw in pixel.")
+  "Maximum width of doc childframw in pixel.
+Consider your machine's screen's resolution when setting this variable.")
+
+(defvar eldoc-box-max-pixel-height 700
+  "Maximum height of doc childframw in pixel.
+Consider your machine's screen's resolution when setting this variable.")
 
 ;;;;; Function
 
