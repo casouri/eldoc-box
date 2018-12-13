@@ -122,6 +122,9 @@
   (let ((doc-buffer (get-buffer-create eldoc-box--buffer)))
     (with-current-buffer doc-buffer
       (setq mode-line-format nil)
+      ;; without this, clicking childframe will make doc buffer the current buffer
+      ;; and `eldoc-box--maybe-cleanup' in `eldoc-box--cleanup-timer' will clear the childframe
+      (setq eldoc-box-hover-mode t)
       (erase-buffer)
       (insert str)
       (eldoc-box--get-frame doc-buffer))))
@@ -199,19 +202,37 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
 (defvar eldoc-box--cleanup-timer nil
   "The timer used to cleanup childframe after ElDoc.")
 
+(defvar eldoc-box--last-point 0
+  ;; used in `eldoc-box--maybe-cleanup'
+  "Last point when eldoc-box showed childframe.")
+
 (defun eldoc-box--maybe-cleanup ()
   "Clean up after ElDoc."
   ;; timer is global, so this function will be called outside
   ;; the buffer with `eldoc-box-hover-mode' enabled
-  (if eldoc-box-hover-mode
-      ;; if eldoc-last-message is nil, the childframe is cleared
-      (eldoc-box--eldoc-message-function eldoc-last-message)
-    ;; sometimes you switched buffer when childframe is on.
-    ;; it wouldn't go away unless you goes back and let eldoc shut it off.
-    ;; if childframe is visible and we are not in `eldoc-box-hover-mode', hide childframe
-    (when (frame-parameter eldoc-box--frame 'visibility)
-      (eldoc-box-quit-frame)))
-  (setq eldoc-box--cleanup-timer nil))
+  (if (and (frame-parameter eldoc-box--frame 'visibility)
+           (or (and (not eldoc-last-message) ; 1
+                    (not (eq (point) eldoc-box--last-point)) ; 2
+                    (not (eq (current-buffer) (get-buffer eldoc-box--buffer)))) ; 3
+               (not eldoc-box-hover-mode))) ; 4
+      ;; 1. Obviously, last-message nil means we are not on a valid symbol anymore.
+      ;; 2. Or are we? If you scroll the childframe with mouse wheel
+      ;; `eldoc-pre-command-refresh-echo-area' will set `eldoc-last-message' to nil.
+      ;; Without the point test, this function, called by `eldoc-box--cleanup-timer'
+      ;; will clear the doc frame, not good
+      ;; 3. If scrolling can't satisfy you and you clicked the childframe
+      ;; both 1. and 2. are satisfied. 3. is the last hope to prevent this function
+      ;; from clearing your precious childframe. There is another safety pin in
+      ;; `eldoc-box--display' that works with 3.
+      ;; 4. Sometimes you switched buffer when childframe is on.
+      ;; it wouldn't go away unless you goes back and let eldoc shut it off.
+      ;; So if we are not in `eldoc-box-hover-mode', clear childframe
+      (eldoc-box-quit-frame)
+    ;; so you didn't clear the doc frame this time, and the last timer has ran out
+    ;; setup another one to make sure the doc frame is cleared
+    ;; once the condition above it met
+    (setq eldoc-box--cleanup-timer
+          (run-with-idle-timer 1 nil #'eldoc-box--maybe-cleanup))))
 
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
@@ -219,7 +240,8 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
       (let ((doc (apply #'format str args)))
         (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
           (eldoc-box--display doc)
-          ;; Why a timer? ElDoc is mainly use in minibuffer,
+          (setq eldoc-box--last-point (point))
+          ;; Why a timer? ElDoc is mainly used in minibuffer,
           ;; where the text is constantly being flushed by other commands
           ;; so ElDoc doesn't try very hard to cleanup
           (when eldoc-box--cleanup-timer (cancel-timer eldoc-box--cleanup-timer))
