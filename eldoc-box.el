@@ -111,7 +111,7 @@
 
 ;;;; Backstage
 ;;;;; Variable
-(defvar eldoc-box--buffer "*eldoc-box*"
+(defvar eldoc-box--buffer " *eldoc-box*"
   "The buffer used to display eglot doc.")
 
 ;;;;; Function
