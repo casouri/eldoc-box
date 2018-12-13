@@ -106,7 +106,6 @@
 (defun eldoc-box-quit-frame ()
   "Hide childframe used by eglot doc."
   (interactive)
-  ;; TODO
   (when eldoc-box--frame
     (make-frame-invisible eldoc-box--frame t)))
 
