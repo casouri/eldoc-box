@@ -1,11 +1,10 @@
+#+TITLE: ElDoc box
 This package displays ElDoc documentations in a childframe.
-
 * Install
 Get the file, add to load path, and
 #+BEGIN_SRC emacs-lisp
 (require 'eldoc-box)
 #+END_SRC
-
 * Usage
 ** Function
 - =eldoc-box-hover-mode= :: Show documentation upon hover. Note that you need to enable ElDoc mode for this to work.
@@ -15,10 +14,8 @@ Get the file, add to load path, and
 ** Variable
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
-
 ** Use with eglot
 As of writing this README, eglot doesn't have a public mode hook, use this hook:
-
 #+BEGIN_SRC emacs-lisp
 (add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
 #+END_SRC
