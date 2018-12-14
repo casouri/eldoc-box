@@ -8,7 +8,6 @@ Get the file, add to load path, and
 
 * Usage
 ** Function
--  =eldoc-box-help-at-point= :: Show the documentation of the symbol at point.
 - =eldoc-box-hover-mode= :: Show documentation upon hover. Note that you need to enable ElDoc mode for this to work.
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.

@@ -92,17 +92,6 @@ Consider your machine's screen's resolution when setting this variable.")
 Consider your machine's screen's resolution when setting this variable.")
 
 ;;;;; Function
-
-(defun eldoc-box-help-at-point ()
-  "Display hover info at point in a childframe."
-  (interactive)
-  (let ((doc (funcall eldoc-documentation-function)))
-    (if doc
-        (progn
-          (eldoc-box--display doc)
-          (eldoc-box--inject-quit-func))
-      (message "No documentation available"))))
-
 (defvar eldoc-box--frame nil ;; A backstage variable
   "The frame to display doc.")
 
