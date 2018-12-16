@@ -134,14 +134,6 @@ Consider your machine's screen's resolution when setting this variable.")
       (insert str)
       (eldoc-box--get-frame doc-buffer))))
 
-(defun eldoc-box-quit-hook ()
-  "Quit eglot doc childframe and remove self from hook."
-  (eldoc-box-quit-frame)
-  (remove-hook 'pre-command-hook #'eldoc-box-quit-hook t))
-
-(defun eldoc-box--inject-quit-func ()
-  "Inject quit function into `pre-command-hook' so doing anything will quit eglot doc childframe."
-  (add-hook 'pre-command-hook #'eldoc-box-quit-hook t t))
 
 (defun eldoc-box--window-side ()
   "Return 'left if the selected window is on the left,
