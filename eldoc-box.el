@@ -122,6 +122,8 @@ Consider your machine's screen's resolution when setting this variable.")
 
 ;;;;; Function
 
+(defvar eldoc-box--display-frame-timer nil)
+
 (defun eldoc-box--display (str)
   "Display STR in childframe."
   (let ((doc-buffer (get-buffer-create eldoc-box--buffer)))
@@ -132,8 +134,17 @@ Consider your machine's screen's resolution when setting this variable.")
       (setq eldoc-box-hover-mode t)
       (erase-buffer)
       (insert str)
-      (eldoc-box--get-frame doc-buffer))))
-
+      ;; Instead of showing the frame immediately, which is slow, wait
+      ;; a little bit to see if any more requests come in, and cancel
+      ;; any obsolete requests. If the user is moving rapidly, this
+      ;; helps.
+      (when (timerp eldoc-box--display-frame-timer)
+        (cancel-timer eldoc-box--display-frame-timer))
+      (setq eldoc-box--display-frame-timer
+            (run-with-idle-timer 1 nil
+                                 (lambda ()
+                                   (eldoc-box--get-frame doc-buffer)
+                                   (setq eldoc-box--display-frame-timer nil)))))))
 
 (defun eldoc-box--window-side ()
   "Return 'left if the selected window is on the left,
