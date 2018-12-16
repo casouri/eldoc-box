@@ -101,6 +101,18 @@ Consider your machine's screen's resolution when setting this variable.")
   (when eldoc-box--frame
     (make-frame-invisible eldoc-box--frame t)))
 
+;;;###autoload
+(define-minor-mode eldoc-box-hover-mode
+  "Displays hover documentations in a childframe. This mode is buffer local."
+  :lighter " ELDOC-BOX"
+  (if eldoc-box-hover-mode
+      (add-function :before-until (local 'eldoc-message-function)
+                    #'eldoc-box--eldoc-message-function)
+    (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
+    ;; if minor mode is turned off when childframe is visible
+    ;; hide it
+    (eldoc-box-quit-frame)))
+
 ;;;; Backstage
 ;;;;; Variable
 (defvar eldoc-box--buffer " *eldoc-box*"
@@ -179,16 +191,6 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     (setq eldoc-box--frame frame)))
 
 ;;;;; ElDoc
-(define-minor-mode eldoc-box-hover-mode
-  "Displays hover documentations in a childframe. This mode is buffer local."
-  :lighter " ELDOC-BOX"
-  (if eldoc-box-hover-mode
-      (add-function :before-until (local 'eldoc-message-function)
-                    #'eldoc-box--eldoc-message-function)
-    (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
-    ;; if minor mode is turned off when childframe is visible
-    ;; hide it
-    (eldoc-box-quit-frame)))
 
 (defvar eldoc-box--cleanup-timer nil
   "The timer used to cleanup childframe after ElDoc.")
