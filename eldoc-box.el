@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2017-2018 Sebastien Chapuis, 2018 Yuan Fu
 
-;; Version: 1.3
+;; Version: 1.4
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
 ;; Maintainer: Yuan Fu <casouri@gmail.com>
@@ -225,7 +225,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     ;; setup another one to make sure the doc frame is cleared
     ;; once the condition above it met
     (setq eldoc-box--cleanup-timer
-          (run-with-idle-timer 1 nil #'eldoc-box--maybe-cleanup))))
+          (run-with-timer 1 nil #'eldoc-box--maybe-cleanup))))
 
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
