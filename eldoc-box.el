@@ -111,7 +111,9 @@ Consider your machine's screen's resolution when setting this variable.")
     (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
     ;; if minor mode is turned off when childframe is visible
     ;; hide it
-    (eldoc-box-quit-frame)))
+    (when eldoc-box--frame
+      (delete-frame eldoc-box--frame)
+      (setq eldoc-box--frame nil))))
 
 ;;;; Backstage
 ;;;;; Variable
