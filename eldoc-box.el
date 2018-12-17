@@ -229,21 +229,20 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
 
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
-  (if (stringp str)
-      (let ((doc (apply #'format str args)))
-        (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
-          (eldoc-box--display doc)
-          (setq eldoc-box--last-point (point))
-          ;; Why a timer? ElDoc is mainly used in minibuffer,
-          ;; where the text is constantly being flushed by other commands
-          ;; so ElDoc doesn't try very hard to cleanup
-          (when eldoc-box--cleanup-timer (cancel-timer eldoc-box--cleanup-timer))
-          ;; this function is also called by `eldoc-pre-command-refresh-echo-area'
-          ;; in `pre-command-hook', which means the timer is reset before every
-          ;; command if `eldoc-box-hover-mode' is on and `eldoc-last-message' is not nil.
-          (setq eldoc-box--cleanup-timer
-                (run-with-timer 1 nil #'eldoc-box--maybe-cleanup))))
-    (eldoc-box-quit-frame)
+  (when (stringp str)
+    (let ((doc (apply #'format str args)))
+      (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
+        (eldoc-box--display doc)
+        (setq eldoc-box--last-point (point))
+        ;; Why a timer? ElDoc is mainly used in minibuffer,
+        ;; where the text is constantly being flushed by other commands
+        ;; so ElDoc doesn't try very hard to cleanup
+        (when eldoc-box--cleanup-timer (cancel-timer eldoc-box--cleanup-timer))
+        ;; this function is also called by `eldoc-pre-command-refresh-echo-area'
+        ;; in `pre-command-hook', which means the timer is reset before every
+        ;; command if `eldoc-box-hover-mode' is on and `eldoc-last-message' is not nil.
+        (setq eldoc-box--cleanup-timer
+              (run-with-timer 1 nil #'eldoc-box--maybe-cleanup))))
     t))
 
 (provide 'eldoc-box)
