@@ -1,5 +1,9 @@
 #+TITLE: ElDoc box
 This package displays ElDoc documentations in a childframe.
+
+#+CAPTION: Using with eglot in python-mode
+[[./screenshot.png]]
+
 * Install
 Get the file, add to load path, and
 #+BEGIN_SRC emacs-lisp
