@@ -54,6 +54,11 @@
 (defvar eldoc-box-only-multi-line nil
   "If non-nil, only use childframe when there are more than one line.")
 
+(defvar eldoc-box-cleanup-interval 1
+  "After this amount of seconds will eldoc-box attempt to cleanup the childframe.
+E.g. if it is set to 1, the childframe is cleared 1 second after
+you moved the point to somewhere else (that doesn't have a doc to show)")
+
 (defvar eldoc-box-frame-parameters
   '(
     ;; (left . -1)
@@ -219,7 +224,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     ;; setup another one to make sure the doc frame is cleared
     ;; once the condition above it met
     (setq eldoc-box--cleanup-timer
-          (run-with-timer 1 nil #'eldoc-box--maybe-cleanup))))
+          (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup))))
 
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
@@ -236,7 +241,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
         ;; in `pre-command-hook', which means the timer is reset before every
         ;; command if `eldoc-box-hover-mode' is on and `eldoc-last-message' is not nil.
         (setq eldoc-box--cleanup-timer
-              (run-with-timer 1 nil #'eldoc-box--maybe-cleanup))))
+              (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup))))
     t))
 
 (provide 'eldoc-box)
