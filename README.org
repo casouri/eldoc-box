@@ -24,3 +24,5 @@ As of writing this README, eglot doesn't have a public mode hook, use this hook:
 #+BEGIN_SRC emacs-lisp
 (add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
 #+END_SRC
+* Contributors
+- [[https://github.com/joaotavora][João Távora]]
