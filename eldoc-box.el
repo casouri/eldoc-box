@@ -59,6 +59,9 @@
 E.g. if it is set to 1, the childframe is cleared 1 second after
 you moved the point to somewhere else (that doesn't have a doc to show)")
 
+(defvar eldoc-box-clear-with-C-g nil
+  "If set to non-nil, eldoc-box clears cildframe when you hit \C-g.")
+
 (defvar eldoc-box-frame-parameters
   '(
     ;; (left . -1)
@@ -120,9 +123,12 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
   "Displays hover documentations in a childframe. This mode is buffer local."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
-      (add-function :before-until (local 'eldoc-message-function)
-                    #'eldoc-box--eldoc-message-function)
+      (progn (add-function :before-until (local 'eldoc-message-function)
+                           #'eldoc-box--eldoc-message-function)
+             (when eldoc-box-clear-with-C-g
+               (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
     (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
+    (advice-remove #'keyboard-quit #'eldoc-box-quit-frame)
     ;; if minor mode is turned off when childframe is visible
     ;; hide it
     (when eldoc-box--frame
