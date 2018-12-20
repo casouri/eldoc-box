@@ -100,6 +100,11 @@ Consider your machine's screen's resolution when setting this variable.
 Set it to a function with no argument
 if you want to dynamically change the maximum height.")
 
+(defvar eldoc-box-position-function #'eldoc-box--default-upper-corner-position-function
+  "Eldoc-box uses this function to set childframe's position.
+This should be a function that returns a (X . Y) cons cell.
+It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
+
 ;;;;; Function
 (defvar eldoc-box--frame nil ;; A backstage variable
   "The frame to display doc.")
@@ -152,6 +157,26 @@ if you want to dynamically change the maximum height.")
         'left
       'right)))
 
+(defun eldoc-box--default-upper-corner-position-function (width _)
+  "The default function to set childframe position.
+Used by `eldoc-box-position-function'.
+Position is calculated base on WIDTH and HEIGHT of chilframe text window"
+  (cons (pcase (eldoc-box--window-side) ; x position + a little padding (16)
+          ;; display doc on right
+          ('left (- (frame-outer-width (selected-frame)) width 16))
+          ;; display doc on left
+          ('right 16))
+        ;; y position + a little padding (16)
+        16))
+
+(defun eldoc-box--default-at-point-position-function (width _)
+  "Set `eldoc-box-position-function' to this function to have childframe appear under point.
+Position is calculated base on WIDTH and HEIGHT of chilframe text window"
+  (let ((point-pos (window-absolute-pixel-position)))
+    (cons (+ 16 (car point-pos)) (- (min (cdr point-pos)
+                                         (frame-outer-width (selected-frame)))
+                                    16))))
+
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
 Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
@@ -182,17 +207,13 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
            (width (car size))
            (height (cdr size))
            (width (+ width (frame-char-width frame))) ; add margin
-           (frame-resize-pixelwise t))
+           (frame-resize-pixelwise t)
+           (pos (funcall eldoc-box-position-function width height)))
       (set-frame-size frame width height t)
       ;; move position
-      (set-frame-position frame (pcase (eldoc-box--window-side) ; x position + a little padding (16)
-                                  ;; display doc on right
-                                  ('left (- (frame-outer-width main-frame) width 16))
-                                  ;; display doc on left
-                                  ('right 16))
-                          ;; y position + a little padding (16)
-                          16))
+      (set-frame-position frame (car pos) (cdr pos)))
     (setq eldoc-box--frame frame)))
+
 
 ;;;;; ElDoc
 
