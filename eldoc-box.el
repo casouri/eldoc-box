@@ -90,11 +90,15 @@ you moved the point to somewhere else (that doesn't have a doc to show)")
 
 (defvar eldoc-box-max-pixel-width 800
   "Maximum width of doc childframw in pixel.
-Consider your machine's screen's resolution when setting this variable.")
+Consider your machine's screen's resolution when setting this variable.
+Set it to a function with no argument
+if you want to dynamically change the maximum width.")
 
 (defvar eldoc-box-max-pixel-height 700
   "Maximum height of doc childframw in pixel.
-Consider your machine's screen's resolution when setting this variable.")
+Consider your machine's screen's resolution when setting this variable.
+Set it to a function with no argument
+if you want to dynamically change the maximum height.")
 
 ;;;;; Function
 (defvar eldoc-box--frame nil ;; A backstage variable
@@ -172,8 +176,9 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     (let* ((size
             (window-text-pixel-size
              window nil nil
-             eldoc-box-max-pixel-width
-             eldoc-box-max-pixel-height t))
+             (if (functionp eldoc-box-max-pixel-width) (funcall eldoc-box-max-pixel-width) eldoc-box-max-pixel-width)
+             (if (functionp eldoc-box-max-pixel-height) (funcall eldoc-box-max-pixel-height) eldoc-box-max-pixel-height)
+             t))
            (width (car size))
            (height (cdr size))
            (width (+ width (frame-char-width frame))) ; add margin
