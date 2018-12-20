@@ -183,7 +183,7 @@ Position is calculated base on WIDTH and HEIGHT of chilframe text window"
                   (- (frame-outer-width (selected-frame)) width))
              50)
           (if (< (- (frame-outer-height (selected-frame)) height) (cdr point-pos))
-              (- (cdr point-pos) height)
+              (- (cdr point-pos) height 60)
             (- (cdr point-pos) 20)))))
 
 (defun eldoc-box--get-frame (buffer)
