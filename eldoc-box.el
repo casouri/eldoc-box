@@ -57,7 +57,9 @@
 (defvar eldoc-box-cleanup-interval 1
   "After this amount of seconds will eldoc-box attempt to cleanup the childframe.
 E.g. if it is set to 1, the childframe is cleared 1 second after
-you moved the point to somewhere else (that doesn't have a doc to show)")
+you moved the point to somewhere else (that doesn't have a doc to show).
+This doesn't apply to =eldoc-box-hover-at-point-mode=,
+in that mode the childframe is cleared as soon as point moves.")
 
 (defvar eldoc-box-clear-with-C-g nil
   "If set to non-nil, eldoc-box clears cildframe when you hit \C-g.")
