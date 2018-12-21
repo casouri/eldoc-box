@@ -168,8 +168,8 @@ You can use C-g to hide the doc."
       ;; and `eldoc-box--maybe-cleanup' in `eldoc-box--cleanup-timer' will clear the childframe
       (setq eldoc-box-hover-mode t)
       (erase-buffer)
-      (insert str)
-      (eldoc-box--get-frame doc-buffer))))
+      (insert str))
+    (eldoc-box--get-frame doc-buffer)))
 
 
 (defun eldoc-box--window-side ()
