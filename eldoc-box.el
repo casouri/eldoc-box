@@ -178,13 +178,24 @@ Position is calculated base on WIDTH and HEIGHT of chilframe text window"
 (defun eldoc-box--default-at-point-position-function (width height)
   "Set `eldoc-box-position-function' to this function to have childframe appear under point.
 Position is calculated base on WIDTH and HEIGHT of chilframe text window"
-  (let ((point-pos (window-absolute-pixel-position)))
-    (cons (- (min (car point-pos)
-                  (- (frame-outer-width (selected-frame)) width))
-             50)
-          (if (< (- (frame-outer-height (selected-frame)) height) (cdr point-pos))
-              (- (cdr point-pos) height 60)
-            (- (cdr point-pos) 20)))))
+  ;; (window-absolute-pixel-position)
+  ;; (posn-x-y (posn-at-point))
+  (let* ((point-pos (window-absolute-pixel-position))
+         (frame-pos (frame-edges nil 'native-edges))
+         (x (- (car point-pos) (car frame-pos))) ; relative to native frame
+         (y (- (cdr point-pos) (nth 1 frame-pos)))
+         (en (frame-char-width))
+         (em (frame-char-height)))
+    (cons (if (< (- (frame-inner-width) width) x)
+              ;; space on the right of the pos is not enough
+              ;; put to left
+              (- x width)
+            (+ x en))
+          (if (< (- (frame-inner-height) height) y)
+              ;; space under the pos is not enough
+              ;; put above
+              (- y height)
+            (+ y em)))))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
