@@ -12,6 +12,7 @@ Get the file, add to load path, and
 * Usage
 ** Function
 - =eldoc-box-hover-mode= :: Show documentation upon hover. Note that you need to enable ElDoc mode for this to work.
+- =eldoc-box-hover-at-point-mode= :: This minor mode shows doc at point. Don't try to enable both minor mode: you can only enable one in the same time.
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Adjust =:background= of  this face for background color of childframe.
@@ -19,12 +20,6 @@ Get the file, add to load path, and
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
 - =eldoc-box-cleanup-interval= :: After this amount of seconds will eldoc-box attempt to cleanup the childframe. E.g. if it is set to 1, the childframe is cleared 1 second after you moved the point to somewhere else (that doesn't have a doc to show).
-
-** Pop at point instead of on the upper corner
-I don't use this, but if you do:
-1. set  =eldoc-box-position-function= to =eldoc-box--default-at-point-position-function=.
-2. Set =eldoc-box-clear-with-C-g= to =t=, so =C-g= will clear the childframe.
-3. Maybe set =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= to some custom functions.
 
 ** Use with eglot
 As of writing this README, eglot doesn't have a public mode hook, use this hook:
