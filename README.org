@@ -20,9 +20,24 @@ Get the file, add to load path, and
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
 - =eldoc-box-cleanup-interval= :: After this amount of seconds will eldoc-box attempt to cleanup the childframe. E.g. if it is set to 1, the childframe is cleared 1 second after you moved the point to somewhere else (that doesn't have a doc to show). This doesn't apply to =eldoc-box-hover-at-point-mode=, in that mode the childframe is cleared as soon as point moves.
-
 ** Use with eglot
 As of writing this README, eglot doesn't have a public mode hook, use this hook:
 #+BEGIN_SRC emacs-lisp
 (add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
+#+END_SRC
+** Help at point hack
+If all you need is a "help at point" popup to be used with eglot, here is my hack:
+#+BEGIN_SRC emacs-lisp
+(defun moon-help-at-point ()
+  (interactive)
+  (when eglot--managed-mode
+    (require 'eldoc-box)
+    (let ((eldoc-box-position-function #'eldoc-box--default-at-point-position-function))
+      (eldoc-box--display
+       (eglot--dbind ((Hover) contents range)
+           (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
+                            (eglot--TextDocumentPositionParams))
+         (when (seq-empty-p contents) (eglot--error "No hover info here"))
+         (eglot--hover-info contents range))))
+    (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t)))
 #+END_SRC
