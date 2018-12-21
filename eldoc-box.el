@@ -204,17 +204,22 @@ Position is calculated base on WIDTH and HEIGHT of chilframe text window"
          (x (- (car point-pos) (car frame-pos))) ; relative to native frame
          (y (- (cdr point-pos) (nth 1 frame-pos)))
          (en (frame-char-width))
-         (em (frame-char-height)))
+         (em (frame-char-height))
+         (frame-geometry (frame-geometry))
+         (tool-bar (if (and tool-bar-mode
+                            (alist-get 'tool-bar-external frame-geometry))
+                       (cdr (alist-get 'tool-bar-size frame-geometry))
+                     0)))
     (cons (if (< (- (frame-inner-width) width) x)
               ;; space on the right of the pos is not enough
               ;; put to left
-              (- x width)
+              (max 0 (- x width))
             (+ x en))
           (if (< (- (frame-inner-height) height) y)
               ;; space under the pos is not enough
               ;; put above
-              (- y height)
-            (+ y em)))))
+              (max 0 (- y height))
+            (+ y em tool-bar)))))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
