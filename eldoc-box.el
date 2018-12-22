@@ -59,7 +59,12 @@
 (defvar eldoc-box-cleanup-interval 1
   "After this amount of seconds will eldoc-box attempt to cleanup the childframe.
 E.g. if it is set to 1, the childframe is cleared 1 second after
-you moved the point to somewhere else (that doesn't have a doc to show)")
+you moved the point to somewhere else (that doesn't have a doc to show).
+This doesn't apply to =eldoc-box-hover-at-point-mode=,
+in that mode the childframe is cleared as soon as point moves.")
+
+(defvar eldoc-box-clear-with-C-g nil
+  "If set to non-nil, eldoc-box clears cildframe when you hit \C-g.")
 
 (defvar eldoc-box-frame-parameters
   '(
@@ -92,11 +97,20 @@ you moved the point to somewhere else (that doesn't have a doc to show)")
 
 (defvar eldoc-box-max-pixel-width 800
   "Maximum width of doc childframw in pixel.
-Consider your machine's screen's resolution when setting this variable.")
+Consider your machine's screen's resolution when setting this variable.
+Set it to a function with no argument
+if you want to dynamically change the maximum width.")
 
 (defvar eldoc-box-max-pixel-height 700
   "Maximum height of doc childframw in pixel.
-Consider your machine's screen's resolution when setting this variable.")
+Consider your machine's screen's resolution when setting this variable.
+Set it to a function with no argument
+if you want to dynamically change the maximum height.")
+
+(defvar eldoc-box-position-function #'eldoc-box--default-upper-corner-position-function
+  "Eldoc-box uses this function to set childframe's position.
+This should be a function that returns a (X . Y) cons cell.
+It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
 
 ;;;;; Function
 (defvar eldoc-box--frame nil ;; A backstage variable
@@ -113,14 +127,34 @@ Consider your machine's screen's resolution when setting this variable.")
   "Displays hover documentations in a childframe. This mode is buffer local."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
-      (add-function :before-until (local 'eldoc-message-function)
-                    #'eldoc-box--eldoc-message-function)
+      (progn (add-function :before-until (local 'eldoc-message-function)
+                           #'eldoc-box--eldoc-message-function)
+             (when eldoc-box-clear-with-C-g
+               (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
     (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
+    (advice-remove #'keyboard-quit #'eldoc-box-quit-frame)
     ;; if minor mode is turned off when childframe is visible
     ;; hide it
     (when eldoc-box--frame
       (delete-frame eldoc-box--frame)
       (setq eldoc-box--frame nil))))
+
+;;;###autoload
+(define-minor-mode eldoc-box-hover-at-point-mode
+  "A convenient minor mode to display doc at point.
+You can use C-g to hide the doc."
+  :lighter ""
+  (if eldoc-box-hover-at-point-mode
+      (progn (setq-local
+              eldoc-box-position-function
+              #'eldoc-box--default-at-point-position-function)
+             (setq-local eldoc-box-clear-with-C-g t)
+             (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t)
+             (eldoc-box-hover-mode))
+    (eldoc-box-hover-mode -1)
+    (remove-hook 'pre-command-hook #'eldoc-box-quit-frame t)
+    (kill-local-variable 'eldoc-box-position-function)
+    (kill-local-variable 'eldoc-box-clear-with-C-g)))
 
 ;;;; Backstage
 ;;;;; Variable
@@ -138,8 +172,8 @@ Consider your machine's screen's resolution when setting this variable.")
       ;; and `eldoc-box--maybe-cleanup' in `eldoc-box--cleanup-timer' will clear the childframe
       (setq eldoc-box-hover-mode t)
       (erase-buffer)
-      (insert str)
-      (eldoc-box--get-frame doc-buffer))))
+      (insert str))
+    (eldoc-box--get-frame doc-buffer)))
 
 
 (defun eldoc-box--window-side ()
@@ -149,6 +183,45 @@ Consider your machine's screen's resolution when setting this variable.")
     (if (eq left-window (selected-window))
         'left
       'right)))
+
+(defun eldoc-box--default-upper-corner-position-function (width _)
+  "The default function to set childframe position.
+Used by `eldoc-box-position-function'.
+Position is calculated base on WIDTH and HEIGHT of chilframe text window"
+  (cons (pcase (eldoc-box--window-side) ; x position + a little padding (16)
+          ;; display doc on right
+          ('left (- (frame-outer-width (selected-frame)) width 16))
+          ;; display doc on left
+          ('right 16))
+        ;; y position + a little padding (16)
+        16))
+
+(defun eldoc-box--default-at-point-position-function (width height)
+  "Set `eldoc-box-position-function' to this function to have childframe appear under point.
+Position is calculated base on WIDTH and HEIGHT of chilframe text window"
+  ;; (window-absolute-pixel-position)
+  ;; (posn-x-y (posn-at-point))
+  (let* ((point-pos (window-absolute-pixel-position))
+         (frame-pos (frame-edges nil 'native-edges))
+         (x (- (car point-pos) (car frame-pos))) ; relative to native frame
+         (y (- (cdr point-pos) (nth 1 frame-pos)))
+         (en (frame-char-width))
+         (em (frame-char-height))
+         (frame-geometry (frame-geometry))
+         (tool-bar (if (and tool-bar-mode
+                            (alist-get 'tool-bar-external frame-geometry))
+                       (cdr (alist-get 'tool-bar-size frame-geometry))
+                     0)))
+    (cons (if (< (- (frame-inner-width) width) x)
+              ;; space on the right of the pos is not enough
+              ;; put to left
+              (max 0 (- x width))
+            (+ x en))
+          (if (< (- (frame-inner-height) height) y)
+              ;; space under the pos is not enough
+              ;; put above
+              (max 0 (- y height))
+            (+ y em tool-bar)))))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
@@ -174,22 +247,19 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     (let* ((size
             (window-text-pixel-size
              window nil nil
-             eldoc-box-max-pixel-width
-             eldoc-box-max-pixel-height t))
+             (if (functionp eldoc-box-max-pixel-width) (funcall eldoc-box-max-pixel-width) eldoc-box-max-pixel-width)
+             (if (functionp eldoc-box-max-pixel-height) (funcall eldoc-box-max-pixel-height) eldoc-box-max-pixel-height)
+             t))
            (width (car size))
            (height (cdr size))
            (width (+ width (frame-char-width frame))) ; add margin
-           (frame-resize-pixelwise t))
+           (frame-resize-pixelwise t)
+           (pos (funcall eldoc-box-position-function width height)))
       (set-frame-size frame width height t)
       ;; move position
-      (set-frame-position frame (pcase (eldoc-box--window-side) ; x position + a little padding (16)
-                                  ;; display doc on right
-                                  ('left (- (frame-outer-width main-frame) width 16))
-                                  ;; display doc on left
-                                  ('right 16))
-                          ;; y position + a little padding (16)
-                          16))
+      (set-frame-position frame (car pos) (cdr pos)))
     (setq eldoc-box--frame frame)))
+
 
 ;;;;; ElDoc
 
