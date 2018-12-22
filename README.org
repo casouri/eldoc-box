@@ -41,3 +41,5 @@ If all you need is a "help at point" popup to be used with eglot, here is my hac
          (eglot--hover-info contents range))))
     (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t)))
 #+END_SRC
+* Contributors
+- [[https://github.com/joaotavora][João Távora]]
