@@ -11,8 +11,10 @@ Get the file, add to load path, and
 #+END_SRC
 * Usage
 ** Function
-- =eldoc-box-hover-mode= :: Show documentation upon hover. Note that you need to enable ElDoc mode for this to work.
-- =eldoc-box-hover-at-point-mode= :: This minor mode shows doc at point. Don't try to enable both minor mode: you can only enable one in the same time.
+Enable either mode will make eldoc display documentation on a popup childframe. The difference is the position of the childframe — the first minor mode displays the childframe on (left or right) upper corner, while the second displays the childframe right below point.
+
+- =eldoc-box-hover-mode= :: Display documentation of the symbol at point in a childframe on upper corner.
+- =eldoc-box-hover-at-point-mode= :: Display documentation of the symbol at point in a childframe below point.
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Adjust =:background= of  this face for background color of childframe.
