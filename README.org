@@ -11,10 +11,10 @@ Get the file, add to load path, and
 #+END_SRC
 * Usage
 ** Function
-Enable either mode will make eldoc display documentation on a popup childframe. The difference is the position of the childframe — the first minor mode displays the childframe on (left or right) upper corner, while the second displays the childframe right below point.
+Enable either mode will make eldoc display documentation on a popup childframe. The difference is the position of the childframe — the first minor mode displays the childframe on the (left or right) upper corner, while the second displays the childframe right below point.
 
 - =eldoc-box-hover-mode= :: Display documentation of the symbol at point in a childframe on upper corner.
-- =eldoc-box-hover-at-point-mode= :: Display documentation of the symbol at point in a childframe below point.
+- =eldoc-box-hover-at-point-mode= :: Display documentation of the symbol at point in a childframe below point. (That's what the =at-point= part mean)
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Adjust =:background= of  this face for background color of childframe.
@@ -28,7 +28,7 @@ As of writing this README, eglot doesn't have a public mode hook, use this hook:
 (add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
 #+END_SRC
 ** Help at point hack
-If all you need is a "help at point" popup to be used with eglot, here is my hack:
+If all you need is a "help at point" popup to be used with eglot, here is my hack. You don't need to enable any minor mode, just call this command on the symbol.
 #+BEGIN_SRC emacs-lisp
 (defun moon-help-at-point ()
   (interactive)
@@ -43,5 +43,6 @@ If all you need is a "help at point" popup to be used with eglot, here is my hac
          (eglot--hover-info contents range))))
     (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t)))
 #+END_SRC
+
 * Contributors
 - [[https://github.com/joaotavora][João Távora]]
