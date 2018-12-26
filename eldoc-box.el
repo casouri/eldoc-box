@@ -149,9 +149,11 @@ You can use C-g to hide the doc."
               eldoc-box-position-function
               #'eldoc-box--default-at-point-position-function)
              (setq-local eldoc-box-clear-with-C-g t)
+             (remove-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
              (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t)
              (eldoc-box-hover-mode))
     (eldoc-box-hover-mode -1)
+    (add-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
     (remove-hook 'pre-command-hook #'eldoc-box-quit-frame t)
     (kill-local-variable 'eldoc-box-position-function)
     (kill-local-variable 'eldoc-box-clear-with-C-g)))
