@@ -6,6 +6,8 @@
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
 ;; Maintainer: Yuan Fu <casouri@gmail.com>
+;; Contributors:
+;;   João Távora <joaotavora@gmail.com>
 ;; URL: https://github.com/casouri/eldoc-box
 ;; Package-Requires: ((emacs "26.1"))
 
