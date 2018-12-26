@@ -125,7 +125,8 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
   "Displays hover documentations in a childframe. This mode is buffer local."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
-      (progn (add-function :before-until (local 'eldoc-message-function)
+      (progn (eldoc-box-hover-at-point-mode -1)
+             (add-function :before-until (local 'eldoc-message-function)
                            #'eldoc-box--eldoc-message-function)
              (when eldoc-box-clear-with-C-g
                (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
@@ -143,7 +144,8 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
 You can use C-g to hide the doc."
   :lighter ""
   (if eldoc-box-hover-at-point-mode
-      (progn (setq-local
+      (progn (eldoc-box-hover-mode -1)
+             (setq-local
               eldoc-box-position-function
               #'eldoc-box--default-at-point-position-function)
              (setq-local eldoc-box-clear-with-C-g t)
