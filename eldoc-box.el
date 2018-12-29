@@ -220,7 +220,7 @@ Position is calculated base on WIDTH and HEIGHT of chilframe text window"
               ;; space on the right of the pos is not enough
               ;; put to left
               (max 0 (- x width))
-            (+ x en))
+            x)
           (if (< (- (frame-inner-height) height) y)
               ;; space under the pos is not enough
               ;; put above
