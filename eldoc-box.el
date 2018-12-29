@@ -60,11 +60,11 @@
   "After this amount of seconds will eldoc-box attempt to cleanup the childframe.
 E.g. if it is set to 1, the childframe is cleared 1 second after
 you moved the point to somewhere else (that doesn't have a doc to show).
-This doesn't apply to =eldoc-box-hover-at-point-mode=,
+This doesn't apply to `eldoc-box-hover-at-point-mode',
 in that mode the childframe is cleared as soon as point moves.")
 
 (defvar eldoc-box-clear-with-C-g nil
-  "If set to non-nil, eldoc-box clears cildframe when you hit \C-g.")
+  "If set to non-nil, eldoc-box clears childframe when you hit \C-g.")
 
 (defvar eldoc-box-frame-parameters
   '(
@@ -96,13 +96,13 @@ in that mode the childframe is cleared as soon as point moves.")
   "Frame parameters used to create the frame.")
 
 (defvar eldoc-box-max-pixel-width 800
-  "Maximum width of doc childframw in pixel.
+  "Maximum width of doc childframe in pixel.
 Consider your machine's screen's resolution when setting this variable.
 Set it to a function with no argument
 if you want to dynamically change the maximum width.")
 
 (defvar eldoc-box-max-pixel-height 700
-  "Maximum height of doc childframw in pixel.
+  "Maximum height of doc childframe in pixel.
 Consider your machine's screen's resolution when setting this variable.
 Set it to a function with no argument
 if you want to dynamically change the maximum height.")
@@ -192,7 +192,7 @@ You can use C-g to hide the doc."
 (defun eldoc-box--default-upper-corner-position-function (width _)
   "The default function to set childframe position.
 Used by `eldoc-box-position-function'.
-Position is calculated base on WIDTH and HEIGHT of chilframe text window"
+Position is calculated base on WIDTH and HEIGHT of childframe text window"
   (cons (pcase (eldoc-box--window-side) ; x position + a little padding (16)
           ;; display doc on right
           ('left (- (frame-outer-width (selected-frame)) width 16))
@@ -203,7 +203,7 @@ Position is calculated base on WIDTH and HEIGHT of chilframe text window"
 
 (defun eldoc-box--default-at-point-position-function (width height)
   "Set `eldoc-box-position-function' to this function to have childframe appear under point.
-Position is calculated base on WIDTH and HEIGHT of chilframe text window"
+Position is calculated base on WIDTH and HEIGHT of childframe text window"
   ;; (window-absolute-pixel-position)
   ;; (posn-x-y (posn-at-point))
   (let* ((point-pos (window-absolute-pixel-position))
