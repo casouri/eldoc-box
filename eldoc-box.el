@@ -169,15 +169,16 @@ You can use C-g to hide the doc."
 
 (defun eldoc-box--display (str)
   "Display STR in childframe."
-  (let ((doc-buffer (get-buffer-create eldoc-box--buffer)))
-    (with-current-buffer doc-buffer
-      (setq mode-line-format nil)
-      ;; without this, clicking childframe will make doc buffer the current buffer
-      ;; and `eldoc-box--maybe-cleanup' in `eldoc-box--cleanup-timer' will clear the childframe
-      (setq eldoc-box-hover-mode t)
-      (erase-buffer)
-      (insert str))
-    (eldoc-box--get-frame doc-buffer)))
+  (unless (equal str "") ; WORKAROUND lsp returns empty string from time to time
+    (let ((doc-buffer (get-buffer-create eldoc-box--buffer)))
+      (with-current-buffer doc-buffer
+        (setq mode-line-format nil)
+        ;; without this, clicking childframe will make doc buffer the current buffer
+        ;; and `eldoc-box--maybe-cleanup' in `eldoc-box--cleanup-timer' will clear the childframe
+        (setq eldoc-box-hover-mode t)
+        (erase-buffer)
+        (insert str))
+      (eldoc-box--get-frame doc-buffer))))
 
 
 (defun eldoc-box--window-side ()
