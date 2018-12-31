@@ -13,6 +13,8 @@ Get the file, add to load path, and
 ** Function
 Enable either mode will make eldoc display documentation on a popup childframe. The difference is the position of the childframe — the first minor mode displays the childframe on the (left or right) upper corner, while the second displays the childframe right below point.
 
+Note that =eldoc-box-hover-at-point-mode= enables =eldoc-box-hover-mode= — it just adds some more configuration on top of the latter, so you want to disable “at-point” mode before switching to =eldoc-box-hover-mode=.
+
 - =eldoc-box-hover-mode= :: Display documentation of the symbol at point in a childframe on upper corner.
 - =eldoc-box-hover-at-point-mode= :: Display documentation of the symbol at point in a childframe below point. (That's what the =at-point= part mean)
 ** Face
