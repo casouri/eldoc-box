@@ -30,8 +30,14 @@ As of writing this README, eglot doesn't have a public mode hook, use this hook:
 (add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
 #+END_SRC
 ** Help at point hack
-If all you need is a "help at point" popup to be used with eglot, here is my hack. You don't need to enable any minor mode, just call this command on the symbol.
+If all you need is a "help at point" popup to be used with eglot, here is my hack. You don't need to enable any minor mode, just call this command on the symbol. (In fact, I don’t even use =eldoc-box-hover-mode= anymore. I bind this hack to =C-h C-h= and lived happily ever after.)
 #+BEGIN_SRC emacs-lisp
+(defun eldoc-box-hack-cleanup ()
+  "Try to clean up the childframe made by eldoc-box hack."
+  (if (eq (point) eldoc-box-hack-last-point)
+      (run-with-timer 0.1 nil #'eldoc-box-hack-cleanup)
+    (eldoc-box-quit-frame)))
+
 (defun moon-help-at-point ()
   (interactive)
   (when eglot--managed-mode
@@ -43,7 +49,8 @@ If all you need is a "help at point" popup to be used with eglot, here is my hac
                             (eglot--TextDocumentPositionParams))
          (when (seq-empty-p contents) (eglot--error "No hover info here"))
          (eglot--hover-info contents range))))
-    (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t)))
+    (setq eldoc-box-hack-last-point (point))
+    (run-with-timer 0.1 nil #'eldoc-box-hack-cleanup)))
 #+END_SRC
 
 * Contributors
