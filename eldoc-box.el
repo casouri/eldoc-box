@@ -235,10 +235,9 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                             `((default-minibuffer-frame . ,(selected-frame))
                               (minibuffer . ,(minibuffer-window))
                               (left-fringe . ,(frame-char-width)))))
-         (window (or (and eldoc-box--frame (frame-selected-window eldoc-box--frame))
-                     (display-buffer-in-child-frame
-                      buffer
-                      `((child-frame-parameters . ,parameter)))))
+         (window (display-buffer-in-child-frame
+                  buffer
+                  `((child-frame-parameters . ,parameter))))
          (frame (window-frame window))
          (main-frame (selected-frame)))
     (make-frame-visible frame)
