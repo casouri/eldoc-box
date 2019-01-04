@@ -208,7 +208,7 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
          (frame-pos (frame-edges nil 'native-edges))
          (x (- (car point-pos) (car frame-pos))) ; relative to native frame
          (y (- (cdr point-pos) (nth 1 frame-pos)))
-         (en (frame-char-width))
+         ;; (en (frame-char-width))
          (em (frame-char-height))
          (frame-geometry (frame-geometry))
          (tool-bar (if (and tool-bar-mode
