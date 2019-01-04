@@ -19,7 +19,7 @@ Note that =eldoc-box-hover-at-point-mode= enables =eldoc-box-hover-mode= — it 
 - =eldoc-box-hover-at-point-mode= :: Display documentation of the symbol at point in a childframe below point. (That's what the =at-point= part mean)
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
-- =eldoc-box-body= :: Adjust =:background= of  this face for background color of childframe.
+- =eldoc-box-body= :: Adjust =:background= and =:font= of  this face for background color and font of the childframe.
 ** Variable
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
