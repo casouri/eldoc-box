@@ -51,7 +51,7 @@
   "The border color used in childframe.")
 
 (defface eldoc-box-body '((t . (:background nil)))
-  "Body face used in eglot doc childframe. Only :background is used.")
+  "Body face used in eglot doc childframe. Only :background and :font are used.")
 
 (defvar eldoc-box-only-multi-line nil
   "If non-nil, only use childframe when there are more than one line.")
@@ -245,7 +245,9 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
     (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
-    (set-face-attribute 'default frame :background (face-attribute 'eldoc-box-body :background main-frame))
+    (set-face-attribute 'default frame
+                        :background (face-attribute 'eldoc-box-body :background main-frame)
+                        :font (face-attribute 'eldoc-box-body :font main-frame))
     ;; set size
     (let* ((size
             (window-text-pixel-size
