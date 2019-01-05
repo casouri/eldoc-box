@@ -20,6 +20,7 @@ Note that =eldoc-box-hover-at-point-mode= enables =eldoc-box-hover-mode= — it 
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Adjust =:background= and =:font= of  this face for background color and font of the childframe. I suggest to use a nice Sans Serif font, such as Source Sans Pro.
+- =eldox-box-eglot-help-at-point= :: [[command][See below]]
 ** Variable
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
@@ -29,29 +30,9 @@ As of writing this README, eglot doesn't have a public mode hook, use this hook:
 #+BEGIN_SRC emacs-lisp
 (add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
 #+END_SRC
-** Help at point hack
-If all you need is a "help at point" popup to be used with eglot, here is my hack. You don't need to enable any minor mode, just call this command on the symbol. (In fact, I don’t even use =eldoc-box-hover-mode= anymore. I bind this hack to =C-h C-h= and lived happily ever after.)
-#+BEGIN_SRC emacs-lisp
-(defun eldoc-box-hack-cleanup ()
-  "Try to clean up the childframe made by eldoc-box hack."
-  (if (eq (point) eldoc-box-hack-last-point)
-      (run-with-timer 0.1 nil #'eldoc-box-hack-cleanup)
-    (eldoc-box-quit-frame)))
 
-(defun moon-help-at-point ()
-  (interactive)
-  (when eglot--managed-mode
-    (require 'eldoc-box)
-    (let ((eldoc-box-position-function #'eldoc-box--default-at-point-position-function))
-      (eldoc-box--display
-       (eglot--dbind ((Hover) contents range)
-           (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
-                            (eglot--TextDocumentPositionParams))
-         (when (seq-empty-p contents) (eglot--error "No hover info here"))
-         (eglot--hover-info contents range))))
-    (setq eldoc-box-hack-last-point (point))
-    (run-with-timer 0.1 nil #'eldoc-box-hack-cleanup)))
-#+END_SRC
+<<command>>
+Eldoc-box also provides a convenient command =eldoc-box-eglot-help-at-point=. Calling this command on a symbol displays a documentation childframe at point. No need to enable any minor mode for this.
 
 * Contributors
 - [[https://github.com/joaotavora][João Távora]]

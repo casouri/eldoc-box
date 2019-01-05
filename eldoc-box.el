@@ -320,6 +320,36 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
               (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup))))
     t))
 
+;;;; Eglot helper
+
+(defvar eldoc-box-eglot-help-at-point-last-point 0
+  "This point cache is used by clean up function.
+If (point) != last point, cleanup frame.")
+
+(defun eldoc-box--eglot-help-at-point-cleanup ()
+  "Try to clean up the childframe made by eldoc-box hack."
+  (if (eq (point) eldoc-box-eglot-help-at-point-last-point)
+      (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)
+    (eldoc-box-quit-frame)))
+
+(defvar eglot--managed-mode)
+(declare-function eglot--dbind "eglot.el")
+
+
+(defun eldoc-box-eglot-help-at-point ()
+  "Display documentation of the symbol at point."
+  (interactive)
+  (when eglot--managed-mode
+    (let ((eldoc-box-position-function #'eldoc-box--default-at-point-position-function))
+      (eldoc-box--display
+       (eglot--dbind ((Hover) contents range)
+           (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
+                            (eglot--TextDocumentPositionParams))
+         (when (seq-empty-p contents) (eglot--error "No hover info here"))
+         (eglot--hover-info contents range))))
+    (setq eldoc-box-eglot-help-at-point-last-point (point))
+    (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)))
+
 (provide 'eldoc-box)
 
 ;;; eldoc-box.el ends here
