@@ -31,6 +31,8 @@ As of writing this README, eglot doesn't have a public mode hook, use this hook:
 (add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
 #+END_SRC
 
+To keep eldoc from displaying documentation at point without enabling any minor mode above: =(add-to-list 'eglot-ignored-server-capabilites :hoverProvider)=.
+
 <<command>>
 Eldoc-box also provides a convenient command =eldoc-box-eglot-help-at-point=. Calling this command on a symbol displays a documentation childframe at point. No need to enable any minor mode for this.
 
