@@ -20,7 +20,7 @@ Note that =eldoc-box-hover-at-point-mode= enables =eldoc-box-hover-mode= — it 
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Adjust =:background= and =:font= of  this face for background color and font of the childframe. I suggest to use a nice Sans Serif font, such as Source Sans Pro.
-- =eldox-box-eglot-help-at-point= :: [[command][See below]]
+- =eldox-box-eglot-help-at-point= :: See below.
 ** Variable
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
@@ -33,7 +33,6 @@ As of writing this README, eglot doesn't have a public mode hook, use this hook:
 
 To keep eldoc from displaying documentation at point without enabling any minor mode above: =(add-to-list 'eglot-ignored-server-capabilites :hoverProvider)=.
 
-<<command>>
 Eldoc-box also provides a convenient command =eldoc-box-eglot-help-at-point=. Calling this command on a symbol displays a documentation childframe at point. No need to enable any minor mode for this.
 
 * Contributors
