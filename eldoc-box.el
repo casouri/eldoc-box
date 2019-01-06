@@ -329,7 +329,9 @@ If (point) != last point, cleanup frame.")
 
 (defun eldoc-box--eglot-help-at-point-cleanup ()
   "Try to clean up the childframe made by eldoc-box hack."
-  (if (eq (point) eldoc-box-eglot-help-at-point-last-point)
+  (if (or (eq (point) eldoc-box-eglot-help-at-point-last-point)
+          ;; don't clean up when the user clicks childframe
+          (eq (selected-frame) eldoc-box--frame))
       (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)
     (eldoc-box-quit-frame)))
 
