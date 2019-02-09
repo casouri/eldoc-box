@@ -67,14 +67,16 @@ in that mode the childframe is cleared as soon as point moves.")
   "If set to non-nil, eldoc-box clears childframe when you hit \C-g.")
 
 (defvar eldoc-box-frame-parameters
-  '(
-    ;; (left . -1)
+  '(;; make the childframe unseen when first created
+    (left . -1)
+    (top . -1)
+    (width  . 0)
+    (height  . 0)
+
     (no-accept-focus . t)
     (no-focus-on-map . t)
     (min-width  . 0)
-    ;; (width  . 0)
     (min-height  . 0)
-    ;; (height  . 0)
     (internal-border-width . 1)
     (vertical-scroll-bars . nil)
     (horizontal-scroll-bars . nil)
@@ -84,7 +86,6 @@ in that mode the childframe is cleared as soon as point moves.")
     (line-spacing . 0)
     (unsplittable . t)
     (undecorated . t)
-    ;; (top . -1)
     (visibility . nil)
     (mouse-wheel-frame . nil)
     (no-other-frame . t)
