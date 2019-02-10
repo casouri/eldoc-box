@@ -247,13 +247,16 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                             `((default-minibuffer-frame . ,(selected-frame))
                               (minibuffer . ,(minibuffer-window))
                               (left-fringe . ,(frame-char-width)))))
-         (window (or (and eldoc-box--frame (frame-selected-window eldoc-box--frame))
-                     (display-buffer-in-child-frame
-                      buffer
-                      `((child-frame-parameters . ,parameter)))))
-         (frame (window-frame window))
+         window frame
          (main-frame (selected-frame)))
     (make-frame-visible frame)
+    (if eldoc-box--frame
+        (progn (setq frame eldoc-box--frame)
+               (setq window (frame-selected-window frame)))
+      (setq window (display-buffer-in-child-frame
+                    buffer
+                    `((child-frame-parameters . ,parameter))))
+      (setq frame (window-frame window)))
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
     (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
