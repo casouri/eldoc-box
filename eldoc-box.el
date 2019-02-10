@@ -249,7 +249,6 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                               (left-fringe . ,(frame-char-width)))))
          window frame
          (main-frame (selected-frame)))
-    (make-frame-visible frame)
     (if eldoc-box--frame
         (progn (setq frame eldoc-box--frame)
                (setq window (frame-selected-window frame)))
@@ -278,7 +277,8 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
       (set-frame-size frame width height t)
       ;; move position
       (set-frame-position frame (car pos) (cdr pos)))
-    (setq eldoc-box--frame frame)))
+    (setq eldoc-box--frame frame)
+    (make-frame-visible frame)))
 
 
 ;;;;; ElDoc
