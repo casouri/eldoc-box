@@ -199,32 +199,44 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
         ;; y position + a little padding (16)
         16))
 
+(defun eldoc-box--point-position-relative-to-native-frame (&optional position window)
+  "Return (X . Y) as the coordinate of POSITION in WINDOW.
+The coordinate is relative to the native frame.
+
+WINDOW nil means use selected window."
+  (let* ((window (window-normalize-window window t))
+	 (pos-in-window
+	  (pos-visible-in-window-p
+	   (or position (window-point window)) window t)))
+    (when pos-in-window
+      ;; change absolute to relative to native frame
+      (let ((edges (window-edges window t nil t)))
+	(cons (+ (nth 0 edges) (nth 0 pos-in-window))
+	      (+ (nth 1 edges) (nth 1 pos-in-window)))))))
+
 (defun eldoc-box--default-at-point-position-function (width height)
   "Set `eldoc-box-position-function' to this function to have childframe appear under point.
 Position is calculated base on WIDTH and HEIGHT of childframe text window"
-  ;; (window-absolute-pixel-position)
-  ;; (posn-x-y (posn-at-point))
-  (let* ((point-pos (window-absolute-pixel-position))
-         (frame-pos (frame-edges nil 'native-edges))
-         (x (- (car point-pos) (car frame-pos))) ; relative to native frame
-         (y (- (cdr point-pos) (nth 1 frame-pos)))
+  (let* ((point-pos (eldoc-box--point-position-relative-to-native-frame))
+         ;; calculate point coordinate relative to native frame
+         ;; because childframe coordinate is relative to native frame
+         (x (car point-pos))
+         (y (cdr point-pos))
          ;; (en (frame-char-width))
          (em (frame-char-height))
-         (frame-geometry (frame-geometry))
-         (tool-bar (if (and tool-bar-mode
-                            (alist-get 'tool-bar-external frame-geometry))
-                       (cdr (alist-get 'tool-bar-size frame-geometry))
-                     0)))
+         (frame-geometry (frame-geometry)))
     (cons (if (< (- (frame-inner-width) width) x)
               ;; space on the right of the pos is not enough
               ;; put to left
               (max 0 (- x width))
+            ;; normal, just return x
             x)
           (if (< (- (frame-inner-height) height) y)
               ;; space under the pos is not enough
               ;; put above
               (max 0 (- y height))
-            (+ y em tool-bar)))))
+            ;; normal, just return y + em
+            (+ y em)))))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
