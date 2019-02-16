@@ -535,6 +535,29 @@ If (point) != last point, cleanup frame.")
     (setq eldoc-box-eglot-help-at-point-last-point (point))
     (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)))
 
+;;;; Company
+
+(defun eldoc-box--move-up-for-company (&rest _)
+  "Move (at point) doc up above current line to avoid clash with company pop up."
+  (when (and eldoc-box-hover-at-point-mode eldoc-box--frame)
+    (let ((current-x (frame-parameter eldoc-box--frame 'left))
+          (current-y (frame-parameter eldoc-box--frame 'top)))
+      (set-frame-position eldoc-box--frame current-x (- current-y (frame-char-height))))))
+
+(defun eldoc-box--move-down-for-company (&rest _)
+  "Move (at point) doc back down when company’s popup closes."
+  (when (and eldoc-box-hover-at-point-mode eldoc-box--frame)
+    (let ((current-x (frame-parameter eldoc-box--frame 'left))
+          (current-y (frame-parameter eldoc-box--frame 'top)))
+      (set-frame-position eldoc-box--frame current-x (+ current-y (frame-char-height))))))
+
+(defun eldoc-box-setup-for-company ()
+  "Set up integration with company."
+  (interactive)
+  (add-hook 'company-completion-started-hook #'eldoc-box--move-up-for-company)
+  (add-hook 'company-completion-cancelled-hook #'eldoc-box--move-down-for-company)
+  (add-hook 'company-completion-finished-hook #'eldoc-box--move-down-for-company))
+
 ;;;; Debug
 
 (defun eldoc-box--print-last-message ()
