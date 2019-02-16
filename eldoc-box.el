@@ -209,6 +209,13 @@ This should be a function that returns a (X . Y) cons cell.
 It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
 
 ;;;;; Function
+
+(defmacro eldoc-box--if-eglot (then &rest else)
+  "Do THEN if eglot is on, do ELSE if not."
+  `(if (bound-and-true-p eglot--managed-mode)
+       ,then
+     ,@else))
+
 (defvar eldoc-box--frame nil ;; A backstage variable
   "The frame to display doc.")
 
