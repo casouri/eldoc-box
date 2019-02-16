@@ -421,6 +421,15 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     (setq eldoc-box--cleanup-timer
           (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup))))
 
+(defun eldoc-box--disable-eldoc-pre-command-hook ()
+  "Disable eldoc’s pre-command-hook.
+It ensures docs in minibuffer doesn’t goes away because of motion
+commands. We don’t need that."
+  (add-function :override (local 'eldoc-pre-command-refresh-echo-area) #'ignore))
+
+(defun eldoc-box--enable-eldoc-pre-command-hook ()
+  "See ‘eldoc-box--disable-eldoc-pre-command-hook’."
+  (remove-function (local 'eldoc-pre-command-refresh-echo-area) #'ignore))
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
   (when (stringp str)
