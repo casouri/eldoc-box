@@ -148,9 +148,6 @@
 (defface eldoc-box-body '((t . (:background nil)))
   "Body face used in eglot doc childframe. Only :background and :font are used.")
 
-(defvar eldoc-box-only-multi-line nil
-  "If non-nil, only use childframe when there are more than one line.")
-
 (defvar eldoc-box-cleanup-interval 1
   "After this amount of seconds will eldoc-box attempt to cleanup the childframe.
 E.g. if it is set to 1, the childframe is cleared 1 second after
@@ -225,6 +222,14 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
   (when eldoc-box--frame
     (make-frame-invisible eldoc-box--frame t)))
 
+(defun eldoc-box--bind-c-g ()
+  "Advice C-g to hide frame."
+  (add-function :before (local 'keyboard-quit) #'eldoc-box-quit-frame))
+
+(defun eldoc-box--unbind-c-g ()
+  "Remove advice on C-g that hides frame."
+  (remove-function (local 'keyboard-quit) #'eldoc-box-quit-frame))
+
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-mode
   "Displays hover documentations in a childframe. This mode is buffer local."
@@ -233,7 +238,13 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
       (progn (add-function :before-until (local 'eldoc-message-function)
                            #'eldoc-box--eldoc-message-function)
              (when eldoc-box-clear-with-C-g
-               (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
+               (eldoc-box--bind-c-g))
+             (eldoc-box--disable-eldoc-pre-command-hook)
+             (eldoc-box--add-spy))
+
+    (eldoc-box--remove-spy)
+    (eldoc-box--enable-eldoc-pre-command-hook)
+    (eldoc-box--unbind-c-g)
     (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
     (advice-remove #'keyboard-quit #'eldoc-box-quit-frame)
     ;; if minor mode is turned off when childframe is visible
@@ -251,14 +262,9 @@ You can use C-g to hide the doc."
       (if eldoc-box-hover-at-point-mode
           (progn (setq-local
                   eldoc-box-position-function
-                  #'eldoc-box--default-at-point-position-function)
-                 (setq-local eldoc-box-clear-with-C-g t)
-                 (remove-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
-                 (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t))
-        (add-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
-        (remove-hook 'pre-command-hook #'eldoc-box-quit-frame t)
-        (kill-local-variable 'eldoc-box-position-function)
-        (kill-local-variable 'eldoc-box-clear-with-C-g))
+                  #'eldoc-box--default-at-point-position-function))
+
+        (kill-local-variable 'eldoc-box-position-function))
     (message "Enable eldoc-box-hover-mode first")))
 
 ;;;; Backstage
@@ -268,8 +274,9 @@ You can use C-g to hide the doc."
 
 ;;;;; Function
 
-(defun eldoc-box--display (str)
-  "Display STR in childframe."
+(defun eldoc-box--display (str &optional dont-move)
+  "Display STR in childframe.
+IF DONT-MOVE is non-nil, doesn’t move position of frame."
   (unless (equal str "") ; WORKAROUND lsp returns empty string from time to time
     (let ((doc-buffer (get-buffer-create eldoc-box--buffer)))
       (with-current-buffer doc-buffer
@@ -280,7 +287,7 @@ You can use C-g to hide the doc."
         (erase-buffer)
         (insert str)
         (goto-char (point-min)))
-      (eldoc-box--get-frame doc-buffer))))
+      (eldoc-box--get-frame doc-buffer dont-move))))
 
 
 (defun eldoc-box--window-side ()
@@ -341,9 +348,10 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
             ;; normal, just return y + em
             (+ y em)))))
 
-(defun eldoc-box--get-frame (buffer)
+(defun eldoc-box--get-frame (buffer &optional dont-move)
   "Return a childframe displaying BUFFER.
-Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
+Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'.
+If DONT-MOVE non-nil, dont’ move frame position."
   (let* ((after-make-frame-functions nil)
          (before-make-frame-hook nil)
          (parameter (append eldoc-box-frame-parameters
@@ -379,7 +387,8 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
            (pos (funcall eldoc-box-position-function width height)))
       (set-frame-size frame width height t)
       ;; move position
-      (set-frame-position frame (car pos) (cdr pos)))
+      (unless dont-move
+        (set-frame-position frame (car pos) (cdr pos))))
     (setq eldoc-box--frame frame)
     (make-frame-visible frame)))
 
@@ -430,23 +439,69 @@ commands. We don’t need that."
 (defun eldoc-box--enable-eldoc-pre-command-hook ()
   "See ‘eldoc-box--disable-eldoc-pre-command-hook’."
   (remove-function (local 'eldoc-pre-command-refresh-echo-area) #'ignore))
+
+(defvar eldoc-box--real-last-message nil
+  "More in ‘eldoc-box--eldoc-spy’.")
+
+(defun eldoc-box--eldoc-spy (&rest _)
+  "Advice this function before ‘eldoc-message’ and we know the real ‘last-message’."
+  ;; because, you know, eldoc-message sets doc it recieved to ‘eldoc-last-message’.
+  ;; so the one we can see in display function is actually the new one,
+  ;; the old one is gone.
+  (setq eldoc-box--real-last-message eldoc-last-message)
+  (print "woome"))
+
+(defun eldoc-box--add-spy ()
+  "Advice ‘eldoc-message’, more in ‘eldoc-box--eldoc-spy’."
+  (add-function :before (local 'eldoc-message) #'eldoc-box--eldoc-spy))
+
+(defun eldoc-box--remove-spy ()
+  "Remove advice on ‘eldoc-message’, more in ‘eldoc-box--eldoc-spy’."
+  (remove-function (local 'eldoc-message) #'eldoc-box--eldoc-spy))
+
+(defun eldoc-box--display-message-do-the-right-thing (doc-last-time doc-this-time)
+  "Display/remove doc depending on DOC-LAST-TIME and DOC-THIS-TIME."
+  (eldoc-box--if-eglot
+   ;; if eglot
+   (if doc-this-time
+       (eldoc-box--display doc-this-time))
+   ;; if not
+   ;;         last-time  this-time  do
+   ;; case1:  nil        nil        nothing
+   ;; case2:  t          nil        remove display
+   ;; case3:  nil        t          display it
+   ;; case4:  t     !=   t          display it
+   ;; case5:  t     ==   t          actually, display new message
+   ;;                               don’t move the position, for the bold face
+   ;;                               change, etc
+   ;;      case 2
+   (cond ((and doc-last-time (not doc-this-time))
+          (eldoc-box-quit-frame))
+         ;;    case 3
+         ((or (and (not doc-last-time) doc-this-time)
+              ;; case 4
+              (and (and doc-last-time doc-this-time)
+                   (not (equal doc-last-time doc-this-time))))
+          (eldoc-box--display doc-this-time))
+         ((and doc-last-time doc-this-time
+               (equal doc-last-time doc-this-time))
+          (eldoc-box--display doc-this-time 'dont-move)))))
+
 (defun eldoc-box--eldoc-message-function (str &rest args)
-  "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
-  (when (stringp str)
-    (let ((doc (apply #'format str args)))
-      (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
-        (eldoc-box--display doc)
-        (setq eldoc-box--last-point (point))
-        ;; Why a timer? ElDoc is mainly used in minibuffer,
-        ;; where the text is constantly being flushed by other commands
-        ;; so ElDoc doesn't try very hard to cleanup
-        (when eldoc-box--cleanup-timer (cancel-timer eldoc-box--cleanup-timer))
-        ;; this function is also called by `eldoc-pre-command-refresh-echo-area'
-        ;; in `pre-command-hook', which means the timer is reset before every
-        ;; command if `eldoc-box-hover-mode' is on and `eldoc-last-message' is not nil.
-        (setq eldoc-box--cleanup-timer
-              (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup))))
-    t))
+  "Front-end for eldoc. Display (or not) STR in childframe and ARGS works like `message'."
+  (let ((doc-last-time eldoc-box--real-last-message)
+        (doc-this-time (if str (apply #'format str args) nil)))
+    (eldoc-box--display-message-do-the-right-thing doc-last-time doc-this-time))
+  ;; this info is used by ‘eldoc-box--maybe-cleanup’
+  (setq eldoc-box--last-point (point))
+  ;; always try to clean up clean up timer, it doesn’t harm anyway
+  (when eldoc-box--cleanup-timer
+    (cancel-timer eldoc-box--cleanup-timer)
+    (setq eldoc-box--cleanup-timer nil))
+  (eldoc-box--if-eglot
+   (setq eldoc-box--cleanup-timer
+         (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup)))
+  t)
 
 ;;;; Eglot helper
 
@@ -473,10 +528,10 @@ If (point) != last point, cleanup frame.")
     (let ((eldoc-box-position-function #'eldoc-box--default-at-point-position-function))
       (eldoc-box--display
        (eglot--dbind ((Hover) contents range)
-           (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
-                            (eglot--TextDocumentPositionParams))
-         (when (seq-empty-p contents) (eglot--error "No hover info here"))
-         (eglot--hover-info contents range))))
+                     (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
+                                      (eglot--TextDocumentPositionParams))
+                     (when (seq-empty-p contents) (eglot--error "No hover info here"))
+                     (eglot--hover-info contents range))))
     (setq eldoc-box-eglot-help-at-point-last-point (point))
     (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)))
 
@@ -484,7 +539,7 @@ If (point) != last point, cleanup frame.")
 
 (defun eldoc-box--print-last-message ()
   "Print ‘eldoc-last-message’."
-  (print eldoc-last-message))
+  (message "last: %s this: %s" eldoc-box--real-last-message eldoc-last-message))
 
 (defun eldoc-box--enable-print-last-message ()
   "Start printing ‘eldoc-last-message’ on every command."
