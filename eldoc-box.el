@@ -102,7 +102,10 @@
 ;; case2:  t          nil        remove display
 ;; case3:  nil        t          display it
 ;; case4:  t     !=   t          display it
-;; case5:  t     ==   t          nothing
+;; case5:  t     ==   t          nothing (actually, display the new one
+;;                                        but don’t change position)[2]
+;;
+;; [2]: for bold face for current component, etc
 ;;
 ;;
 ;; 3. Problem with eglot
