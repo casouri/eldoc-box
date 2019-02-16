@@ -33,6 +33,101 @@
 ;;; Commentary:
 ;;
 ;;  Made a lot of change to use it for ElDoc
+;;
+;;
+;; 1.How does eldoc work:
+;;
+;; Entry function: ‘eldoc-print-current-symbol-info’
+;; (there is a timer that set it up)
+;;
+;; 1.1 What it does:
+;;
+;; if we should display a message now [1]:
+;;    get doc from ‘eldoc-documentation-function’
+;;
+;;    if it is non-nil:
+;;       display it (with ‘eldoc-message-function’)
+;;
+;;    else if ‘eldoc-last-message’ is non-nil:
+;;       pass nil to message function
+;;
+;;    else (both are nil): do nothing
+;;
+;;    finally set ‘eldoc-last-message’ to the doc we get,
+;;    whether it is non-nil or nil
+;;
+;; [1]: 1) we are not in the middle of some command, and 2) last command
+;; is in ‘eldoc-message-commands’, i.e., motion command, self-insert, etc
+;;
+;;
+;; In conclusion:
+;;
+;;         last-time  this-time  do
+;; case1:  nil        nil        nothing
+;; case2:  t          nil        pass nil to message function
+;; case3:  nil/t      t          display it
+;;
+;; if you got time to kill, look at ‘eldoc-message’ for a nice little puzzle
+;;
+;;
+;; 1.2 When does it run:
+;;
+;; Nothing fancy, run in an idle timer
+;; (a timer scheduler in ‘post-command-hook’? maybe a bit overkill)
+;;
+;; 2. What we do:
+;;
+;; 2.1 What we want:
+;;
+;; 1) display like normal minibuffer doc
+;; 2) be able to disappear AS SOON AS cursor moves to undoc-able place
+;; 3) doesn’t disappear and reappear when moving inside the same symbol
+;;    (displaying the same doc)
+;; 4) (for displaying around cursor) doesn’t move position when displaying
+;;    the same doc
+;;
+;; 2.2 What information do we need to know:
+;;
+;; 1) doc of this time
+;; 2) doc of last time
+;;
+;; 2.3 When do we need to run
+;;
+;; after each command
+;;
+;; 2.4 How do we display
+;;
+;;         last-time  this-time  do
+;; case1:  nil        nil        nothing
+;; case2:  t          nil        remove display
+;; case3:  nil        t          display it
+;; case4:  t     !=   t          display it
+;; case5:  t     ==   t          nothing
+;;
+;;
+;; 3. Problem with eglot
+;;
+;; Eglot is async, so it doesn’t return doc immediately
+;;
+;; 3.1 How does it work
+;;
+;; 1) eldoc calls it for doc, it returns nil immediately
+;; 2) what ‘eldoc-message’ does:
+;;         last-time  this-time  do
+;; case1:  nil        nil        nothing
+;; case2:  t          nil        remove display
+;; 3) After a very short time, it calls ‘eldoc-message’ with doc:
+;; what ‘eldoc-message’ does:
+;; case2:  t          nil        pass nil to message function
+;; case3:  nil/t      t          display it
+;;
+;; Conclusion:
+;;
+;; 1) I don’t think “disappear immediately” and no blink (disappear & reappear)
+;;    can be achieved in the same time for eglot, I go for no blink, so:
+;; 2) Use timer to clean up, display function (us) don’t hide doc in 2)
+;;    even if receives nil
+
 
 ;;; Code:
 ;;
