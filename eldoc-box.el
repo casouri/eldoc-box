@@ -327,8 +327,7 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
          (x (car point-pos))
          (y (cdr point-pos))
          ;; (en (frame-char-width))
-         (em (frame-char-height))
-         (frame-geometry (frame-geometry)))
+         (em (frame-char-height)))
     (cons (if (< (- (frame-inner-width) width) x)
               ;; space on the right of the pos is not enough
               ;; put to left
