@@ -480,6 +480,22 @@ If (point) != last point, cleanup frame.")
     (setq eldoc-box-eglot-help-at-point-last-point (point))
     (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)))
 
+;;;; Debug
+
+(defun eldoc-box--print-last-message ()
+  "Print ‘eldoc-last-message’."
+  (print eldoc-last-message))
+
+(defun eldoc-box--enable-print-last-message ()
+  "Start printing ‘eldoc-last-message’ on every command."
+  (interactive)
+  (add-hook 'post-command-hook #'eldoc-box--print-last-message t t))
+
+(defun eldoc-box--disable-print-last-message ()
+  "Stop printing ‘eldoc-last-message’ on every command."
+  (interactive)
+  (remove-hook 'post-command-hook #'eldoc-box--print-last-message t))
+
 (provide 'eldoc-box)
 
 ;;; eldoc-box.el ends here
