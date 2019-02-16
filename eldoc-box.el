@@ -254,7 +254,8 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
     ;; hide it
     (when eldoc-box--frame
       (delete-frame eldoc-box--frame)
-      (setq eldoc-box--frame nil))))
+      (setq eldoc-box--frame nil))
+    (eldoc-box-hover-at-point-mode -1)))
 
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-at-point-mode
