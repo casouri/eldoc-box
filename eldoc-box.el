@@ -260,9 +260,8 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
       (setq window (display-buffer-in-child-frame
                     buffer
                     `((child-frame-parameters . ,parameter))))
-      (setq frame (window-frame window))
-      (when eldoc-box-fringe-use-same-bg
-        (set-face-attribute 'fringe frame :background nil :inherit 'default)))
+      (setq frame (window-frame window)))
+    (set-face-attribute 'fringe frame :background nil :inherit 'default)
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
     (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
