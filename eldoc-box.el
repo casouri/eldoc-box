@@ -113,6 +113,9 @@ if you want to dynamically change the maximum height.")
 This should be a function that returns a (X . Y) cons cell.
 It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
 
+(defvar eldoc-box-fringe-use-same-bg t
+  "T means fringe's background color is set to as same as that of default.")
+
 ;;;;; Function
 (defvar eldoc-box--frame nil ;; A backstage variable
   "The frame to display doc.")
@@ -257,13 +260,16 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
       (setq window (display-buffer-in-child-frame
                     buffer
                     `((child-frame-parameters . ,parameter))))
-      (setq frame (window-frame window)))
+      (setq frame (window-frame window))
+      (when eldoc-box-fringe-use-same-bg
+        (set-face-attribute 'fringe frame :background nil :inherit 'default)))
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
     (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
     (set-face-attribute 'default frame
                         :background (face-attribute 'eldoc-box-body :background main-frame)
                         :font (face-attribute 'eldoc-box-body :font main-frame))
+
     ;; set size
     (let* ((size
             (window-text-pixel-size

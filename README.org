@@ -21,6 +21,8 @@ Get the file, add to load path, and
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
 - =eldoc-box-cleanup-interval= :: After this amount of seconds will eldoc-box attempt to cleanup the childframe. E.g. if it is set to 1, the childframe is cleared 1 second after you moved the point to somewhere else (that doesn't have a doc to show). This doesn't apply to =eldoc-box-hover-at-point-mode=, in that mode the childframe is cleared as soon as point moves.
+- =eldoc-box-fringe-use-same-bg= :: T means fringe's background color is set to as same as that of default. Default to t.
+
 ** Use with eglot
 As of writing this README, eglot doesn't have a public mode hook, use this hook:
 #+BEGIN_SRC emacs-lisp
