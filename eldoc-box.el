@@ -256,7 +256,9 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
          (main-frame (selected-frame)))
     (if (and eldoc-box--frame (frame-live-p eldoc-box--frame))
         (progn (setq frame eldoc-box--frame)
-               (setq window (frame-selected-window frame)))
+               (setq window (frame-selected-window frame))
+               ;; in case the main frame changed
+               (set-frame-parameter frame 'parent-frame main-frame))
       (setq window (display-buffer-in-child-frame
                     buffer
                     `((child-frame-parameters . ,parameter))))
