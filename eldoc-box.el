@@ -329,7 +329,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
 
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
-  (when (stringp str)
+  (when (and (stringp str) (not (equal str "")))
     (let ((doc (apply #'format str args)))
       (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
         (eldoc-box--display doc)
