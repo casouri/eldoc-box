@@ -377,6 +377,35 @@ If (point) != last point, cleanup frame.")
     (setq eldoc-box-eglot-help-at-point-last-point (point))
     (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)))
 
+;;;; Comany compatibility
+;;
+;; Hide childframe when company pops up
+
+(defvar eldoc-box--chilframe-visible-before-company-popup nil
+  "Set to t if company kills childframe for its popup.")
+
+(defun eldoc-box--company-on-hook (&rest _)
+  "Hide at-point doc when company popup show up."
+  (eldoc-box-hover-mode -1)
+  (when eldoc-box-hover-at-point-mode
+    (eldoc-box-quit-frame)))
+
+(defun eldoc-box--company-cancel-hook (&rest _)
+  "Show doc when company canceled completion."
+  (eldoc-box-hover-mode)
+  (when (and eldoc-box-hover-at-point-mode
+             eldoc-box--chilframe-visible-before-company-popup)
+    (eldoc-box-show-frame)))
+
+(defun eldoc-box--company-finish-hook (&rest _)
+  "Show doc when company finished completion."
+  (eldoc-box--company-cancel-hook))
+
+(with-eval-after-load 'company
+  (add-hook 'company-completion-started-hook #'eldoc-box--company-on-hook t)
+  (add-hook 'company-completion-cancelled-hook #'eldoc-box--company-cancel-hook t)
+  (add-hook 'company-completion-finished-hook #'eldoc-box--company-finish-hook t))
+
 (provide 'eldoc-box)
 
 ;;; eldoc-box.el ends here
