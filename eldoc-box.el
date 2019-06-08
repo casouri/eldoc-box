@@ -245,6 +245,14 @@ WINDOW nil means use selected window."
             ;; normal, just return y + em
             (+ y em)))))
 
+(defun eldoc-box--default-at-point-position-function (width height)
+  "Set `eldoc-box-position-function' to this function to have childframe appear under point.
+Position is calculated base on WIDTH and HEIGHT of childframe text window."
+  (let* ((pos (eldoc-box--default-at-point-position-function-1 width height))
+         (x (car pos))
+         (y (cdr pos)))
+    (cons (or (eldoc-box--at-point-x-by-company) x)
+          y)))
 (defun eldoc-box--update-childframe-geometry (frame window)
   "Update the size and the position of childframe.
 FRAME is the childframe, WINDOW is the primary window."
