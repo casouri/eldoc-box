@@ -219,9 +219,8 @@ WINDOW nil means use selected window."
 	(cons (+ (nth 0 edges) (nth 0 pos-in-window))
 	      (+ (nth 1 edges) (nth 1 pos-in-window)))))))
 
-(defun eldoc-box--default-at-point-position-function (width height)
-  "Set `eldoc-box-position-function' to this function to have childframe appear under point.
-Position is calculated base on WIDTH and HEIGHT of childframe text window"
+(defun eldoc-box--default-at-point-position-function-1 (width height)
+  "See `eldoc-box--default-at-point-position-function'."
   (let* ((point-pos (eldoc-box--point-position-relative-to-native-frame))
          ;; calculate point coordinate relative to native frame
          ;; because childframe coordinate is relative to native frame
@@ -242,6 +241,15 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
               (max 0 (- y height))
             ;; normal, just return y + em
             (+ y em)))))
+
+(defun eldoc-box--default-at-point-position-function (width height)
+  "Set `eldoc-box-position-function' to this function to have childframe appear under point.
+Position is calculated base on WIDTH and HEIGHT of childframe text window."
+  (let* ((pos (eldoc-box--default-at-point-position-function-1 width height))
+         (x (car pos))
+         (y (cdr pos)))
+    (cons (or (eldoc-box--at-point-x-by-company) x)
+          y)))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
@@ -370,41 +378,28 @@ If (point) != last point, cleanup frame.")
     (let ((eldoc-box-position-function #'eldoc-box--default-at-point-position-function))
       (eldoc-box--display
        (eglot--dbind ((Hover) contents range)
-           (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
-                            (eglot--TextDocumentPositionParams))
-         (when (seq-empty-p contents) (eglot--error "No hover info here"))
-         (eglot--hover-info contents range))))
+                     (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
+                                      (eglot--TextDocumentPositionParams))
+                     (when (seq-empty-p contents) (eglot--error "No hover info here"))
+                     (eglot--hover-info contents range))))
     (setq eldoc-box-eglot-help-at-point-last-point (point))
     (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)))
 
 ;;;; Comany compatibility
 ;;
-;; Hide childframe when company pops up
 
-(defvar eldoc-box--chilframe-visible-before-company-popup nil
-  "Set to t if company kills childframe for its popup.")
+;; see also `eldoc-box--default-at-point-position-function'
 
-(defun eldoc-box--company-on-hook (&rest _)
-  "Hide at-point doc when company popup show up."
-  (eldoc-box-hover-mode -1)
-  (when eldoc-box-hover-at-point-mode
-    (eldoc-box-quit-frame)))
+;; please compiler
+(defvar company-pseudo-tooltip-overlay)
 
-(defun eldoc-box--company-cancel-hook (&rest _)
-  "Show doc when company canceled completion."
-  (eldoc-box-hover-mode)
-  (when (and eldoc-box-hover-at-point-mode
-             eldoc-box--chilframe-visible-before-company-popup)
-    (eldoc-box-show-frame)))
-
-(defun eldoc-box--company-finish-hook (&rest _)
-  "Show doc when company finished completion."
-  (eldoc-box--company-cancel-hook))
-
-(with-eval-after-load 'company
-  (add-hook 'company-completion-started-hook #'eldoc-box--company-on-hook t)
-  (add-hook 'company-completion-cancelled-hook #'eldoc-box--company-cancel-hook t)
-  (add-hook 'company-completion-finished-hook #'eldoc-box--company-finish-hook t))
+(defun eldoc-box--at-point-x-by-company ()
+  "Return the x position that accommodates company's popup."
+  (if (and (featurep 'company) company-pseudo-tooltip-overlay)
+      (* (frame-char-width)
+         (+ (overlay-get company-pseudo-tooltip-overlay 'company-width)
+            (overlay-get company-pseudo-tooltip-overlay 'company-column)))
+    nil))
 
 (provide 'eldoc-box)
 
