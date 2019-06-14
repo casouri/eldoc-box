@@ -13,7 +13,7 @@ Get the file, add to load path, and
 ** Function
 - =eldoc-box-hover-mode= :: Display documentation of the symbol at point in a childframe on upper corner.
 - =eldoc-box-hover-at-point-mode= :: If you enable this minor mode *on top of* =eldoc-box-hover-mode=, the childframe is displayed at point, instead of on the upper corner.
-- =eldox-box-eglot-help-at-point= :: See below.
+- =eldoc-box-eglot-help-at-point= :: See below.
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Adjust =:background= and =:font= of  this face for background color and font of the childframe. I suggest to use a nice Sans Serif font, such as Source Sans Pro.
