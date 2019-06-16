@@ -154,10 +154,13 @@ You can use C-g to hide the doc."
                   eldoc-box-position-function
                   #'eldoc-box--default-at-point-position-function)
                  (setq-local eldoc-box-clear-with-C-g t)
+                 ;; always kill frame instead of using maybe-cleanup
                  (remove-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
-                 (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t))
+                 ;; (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t)
+                 (add-hook 'post-command-hook #'eldoc-box--follow-cursor t t))
         (add-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
-        (remove-hook 'pre-command-hook #'eldoc-box-quit-frame t)
+        ;; (remove-hook 'pre-command-hook #'eldoc-box-quit-frame t)
+        (remove-hook 'post-command-hook #'eldoc-box--follow-cursor t)
         (kill-local-variable 'eldoc-box-position-function)
         (kill-local-variable 'eldoc-box-clear-with-C-g))
     (message "Enable eldoc-box-hover-mode first")))
@@ -250,6 +253,29 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window."
          (y (cdr pos)))
     (cons (or (eldoc-box--at-point-x-by-company) x)
           y)))
+(defun eldoc-box--update-childframe-geometry (frame window)
+  "Update the size and the position of childframe.
+FRAME is the childframe, WINDOW is the primary window."
+  (let* ((size
+          (window-text-pixel-size
+           window nil nil
+           (if (functionp eldoc-box-max-pixel-width) (funcall eldoc-box-max-pixel-width) eldoc-box-max-pixel-width)
+           (if (functionp eldoc-box-max-pixel-height) (funcall eldoc-box-max-pixel-height) eldoc-box-max-pixel-height)
+           t))
+         (width (car size))
+         (height (cdr size))
+         (width (+ width (frame-char-width frame))) ; add margin
+         (frame-resize-pixelwise t)
+         (pos (funcall eldoc-box-position-function width height)))
+    (set-frame-size frame width height t)
+    ;; move position
+    (set-frame-position frame (car pos) (cdr pos))))
+
+(defun eldoc-box--follow-cursor ()
+  "Make childframe follow cursor in at-point mode."
+  (when (frame-live-p eldoc-box--frame)
+    (eldoc-box--update-childframe-geometry
+     eldoc-box--frame (frame-selected-window eldoc-box--frame))))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
@@ -280,20 +306,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                         :font (face-attribute 'eldoc-box-body :font main-frame))
 
     ;; set size
-    (let* ((size
-            (window-text-pixel-size
-             window nil nil
-             (if (functionp eldoc-box-max-pixel-width) (funcall eldoc-box-max-pixel-width) eldoc-box-max-pixel-width)
-             (if (functionp eldoc-box-max-pixel-height) (funcall eldoc-box-max-pixel-height) eldoc-box-max-pixel-height)
-             t))
-           (width (car size))
-           (height (cdr size))
-           (width (+ width (frame-char-width frame))) ; add margin
-           (frame-resize-pixelwise t)
-           (pos (funcall eldoc-box-position-function width height)))
-      (set-frame-size frame width height t)
-      ;; move position
-      (set-frame-position frame (car pos) (cdr pos)))
+    (eldoc-box--update-childframe-geometry frame window)
     (setq eldoc-box--frame frame)
     (make-frame-visible frame)))
 
