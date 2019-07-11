@@ -9,6 +9,9 @@ Get the file, add to load path, and
 #+BEGIN_SRC emacs-lisp
 (require 'eldoc-box)
 #+END_SRC
+
+It is also available on [[https://melpa.org/#/eldoc-box][MELPA]]
+
 * Usage
 ** Function
 - =eldoc-box-hover-mode= :: Display documentation of the symbol at point in a childframe on upper corner.
