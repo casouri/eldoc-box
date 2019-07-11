@@ -32,7 +32,7 @@
 
 ;;; Commentary:
 ;;
-;;  Made a lot of change to use it for ElDoc
+;; See documentation in README.org or visit homepage
 
 ;;; Code:
 ;;

@@ -1,6 +1,9 @@
 #+TITLE: ElDoc box
 This package displays ElDoc documentations in a childframe.
 
+[[https://melpa.org/#/eldoc-box][file:https://melpa.org/packages/eldoc-box-badge.svg]]
+[[https://stable.melpa.org/#/eldoc-box][file:https://stable.melpa.org/packages/eldoc-box-badge.svg]]
+
 #+CAPTION: Using with eglot in python-mode
 [[./screenshot.png]]
 
