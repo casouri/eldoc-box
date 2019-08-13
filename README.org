@@ -22,7 +22,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]]
 - =eldoc-box-eglot-help-at-point= :: See below.
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
-- =eldoc-box-body= :: Adjust =:background= and =:font= of  this face for background color and font of the childframe. I suggest to use a nice Sans Serif font, such as Source Sans Pro.
+- =eldoc-box-body= :: Default face used by childframe.  I suggest to use a nice Sans Serif font such as Source Sans Pro, and a lighter or darker background.
 ** Variable
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.

@@ -51,7 +51,7 @@
   "The border color used in childframe.")
 
 (defface eldoc-box-body '((t . (:background nil)))
-  "Body face used in eglot doc childframe. Only :background and :font are used.")
+  "Body face used in eglot doc childframe.")
 
 (defvar eldoc-box-only-multi-line nil
   "If non-nil, only use childframe when there are more than one line.")
@@ -182,6 +182,7 @@ You can use C-g to hide the doc."
         (setq mode-line-format nil)
         ;; without this, clicking childframe will make doc buffer the current buffer
         ;; and `eldoc-box--maybe-cleanup' in `eldoc-box--cleanup-timer' will clear the childframe
+        (buffer-face-set 'eldoc-box-body)
         (setq eldoc-box-hover-mode t)
         (erase-buffer)
         (insert str)
@@ -299,14 +300,10 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                     buffer
                     `((child-frame-parameters . ,parameter))))
       (setq frame (window-frame window)))
-    (set-face-attribute 'fringe frame :background nil :inherit 'default)
+    (set-face-attribute 'fringe frame :background nil :inherit 'eldoc-box-body)
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
     (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
-    (set-face-attribute 'default frame
-                        :background (face-attribute 'eldoc-box-body :background main-frame)
-                        :font (face-attribute 'eldoc-box-body :font main-frame))
-
     ;; set size
     (eldoc-box--update-childframe-geometry frame window)
     (setq eldoc-box--frame frame)
