@@ -116,6 +116,14 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
 (defvar eldoc-box-fringe-use-same-bg t
   "T means fringe's background color is set to as same as that of default.")
 
+(defvar eldoc-box-buffer-hook nil
+  "Hook run after buffer for doc is setup.
+Run inside the new buffer.")
+
+(defvar eldoc-box-frame-hook nil
+  "Hook run after doc frame is setup but just before it is made visible.
+Each function runs inside the new frame and receives the main frame as argument.")
+
 ;;;;; Function
 (defvar eldoc-box--frame nil ;; A backstage variable
   "The frame to display doc.")
@@ -186,7 +194,8 @@ You can use C-g to hide the doc."
         (setq eldoc-box-hover-mode t)
         (erase-buffer)
         (insert str)
-        (goto-char (point-min)))
+        (goto-char (point-min))
+        (run-hook-with-args 'eldoc-box-buffer-hook))
       (eldoc-box--get-frame doc-buffer))))
 
 
@@ -307,6 +316,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     ;; set size
     (eldoc-box--update-childframe-geometry frame window)
     (setq eldoc-box--frame frame)
+    (run-hook-with-args 'eldoc-box-frame-hook main-frame)
     (make-frame-visible frame)))
 
 
