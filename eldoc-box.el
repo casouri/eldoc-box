@@ -310,6 +310,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                     `((child-frame-parameters . ,parameter))))
       (setq frame (window-frame window)))
     (set-face-attribute 'fringe frame :background nil :inherit 'eldoc-box-body)
+    (fringe-mode 3)
     (set-window-dedicated-p window t)
     (redirect-frame-focus frame (frame-parent frame))
     (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
