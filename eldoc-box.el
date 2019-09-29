@@ -241,9 +241,7 @@ WINDOW nil means use selected window."
          ;; because childframe coordinate is relative to native frame
          (x (car point-pos))
          (y (cdr point-pos))
-         ;; (en (frame-char-width))
-         (em (frame-char-height))
-         (frame-geometry (frame-geometry)))
+         (em (frame-char-height)))
     (cons (if (< (- (frame-inner-width) width) x)
               ;; space on the right of the pos is not enough
               ;; put to left
