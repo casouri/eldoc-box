@@ -253,8 +253,9 @@ WINDOW nil means use selected window."
     (when pos-in-window
       ;; change absolute to relative to native frame
       (let ((edges (window-edges window t nil t)))
-	(cons (+ (nth 0 edges) (nth 0 pos-in-window))
-	      (+ (nth 1 edges) (nth 1 pos-in-window)))))))
+	(cons (+ (nth 0 edges) (nth 0 pos-in-window)) ; x
+              (+ (nth 1 edges) (nth 1 pos-in-window)
+                 (- (window-header-line-height window)))))))) ; y
 
 (defun eldoc-box--default-at-point-position-function-1 (width height)
   "See `eldoc-box--default-at-point-position-function'."
