@@ -124,7 +124,14 @@ Run inside the new buffer.")
   "Hook run after doc frame is setup but just before it is made visible.
 Each function runs inside the new frame and receives the main frame as argument.")
 
+(defvar eldoc-box-self-insert-command-list '(self-insert-command outshine-self-insert-command)
+  "Commands in this list are considered self-insert-command by eldoc-box.
+See `eldoc-box-inhibit-display-when-moving'.")
+
 ;;;;; Function
+(defvar eldoc-box--inhibit-childframe nil
+  "If non-nil, inhibit display of childframe.")
+
 (defvar eldoc-box--frame nil ;; A backstage variable
   "The frame to display doc.")
 
@@ -159,7 +166,8 @@ Intended for internal use."
 
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-mode
-  "Displays hover documentations in a childframe. This mode is buffer local."
+  "Displays hover documentations in a childframe.
+The default position of childframe is upper corner."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
       (progn (when eldoc-box-hover-at-point-mode
@@ -169,8 +177,9 @@ Intended for internal use."
 
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-at-point-mode
-  "A convenient minor mode to display doc at point.
-You can use C-g to hide the doc."
+  "A convenient minor mode to display doc at point
+instead of at upper corner. You can use C-g to hide the doc.
+The childframe will follow you when you type."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-at-point-mode
       (progn (when eldoc-box-hover-mode
@@ -293,42 +302,63 @@ FRAME is the childframe, WINDOW is the primary window."
     ;; move position
     (set-frame-position frame (car pos) (cdr pos))))
 
+(defvar eldoc-box--inhibit-childframe-timer nil
+  "When this timer is on, inhibit childframe display.
+Intended for follow-cursor to disable display when moving cursor.")
+
+(defun eldoc-box--inhibit-childframe-for (sec)
+  "Inhibit display of childframe for SEC seconds."
+  (when eldoc-box--inhibit-childframe-timer
+    (cancel-timer eldoc-box--inhibit-childframe-timer))
+  (eldoc-box-quit-frame)
+  (setq eldoc-box--inhibit-childframe t
+        eldoc-box--inhibit-childframe-timer
+        (run-with-timer sec nil
+                        (lambda ()
+                          (setq eldoc-box--inhibit-childframe nil)))))
+
 (defun eldoc-box--follow-cursor ()
   "Make childframe follow cursor in at-point mode."
-  (when (frame-live-p eldoc-box--frame)
-    (eldoc-box--update-childframe-geometry
-     eldoc-box--frame (frame-selected-window eldoc-box--frame))))
+  (if (member this-command eldoc-box-self-insert-command-list)
+      (progn (when (frame-live-p eldoc-box--frame)
+               (eldoc-box--update-childframe-geometry
+                eldoc-box--frame (frame-selected-window eldoc-box--frame))))
+    ;; if not typing, inhibit display
+    (eldoc-box--inhibit-childframe-for 0.2)))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
 Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
-  (let* ((after-make-frame-functions nil)
-         (before-make-frame-hook nil)
-         (parameter (append eldoc-box-frame-parameters
-                            `((default-minibuffer-frame . ,(selected-frame))
-                              (minibuffer . ,(minibuffer-window))
-                              (left-fringe . ,(frame-char-width)))))
-         window frame
-         (main-frame (selected-frame)))
-    (if (and eldoc-box--frame (frame-live-p eldoc-box--frame))
-        (progn (setq frame eldoc-box--frame)
-               (setq window (frame-selected-window frame))
-               ;; in case the main frame changed
-               (set-frame-parameter frame 'parent-frame main-frame))
-      (setq window (display-buffer-in-child-frame
-                    buffer
-                    `((child-frame-parameters . ,parameter))))
-      (setq frame (window-frame window)))
-    (set-face-attribute 'fringe frame :background nil :inherit 'eldoc-box-body)
-    (fringe-mode 3)
-    (set-window-dedicated-p window t)
-    (redirect-frame-focus frame (frame-parent frame))
-    (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
-    ;; set size
-    (eldoc-box--update-childframe-geometry frame window)
-    (setq eldoc-box--frame frame)
-    (run-hook-with-args 'eldoc-box-frame-hook main-frame)
-    (make-frame-visible frame)))
+  (if eldoc-box--inhibit-childframe
+      ;; if inhibit display, do nothing
+      eldoc-box--frame
+    (let* ((after-make-frame-functions nil)
+           (before-make-frame-hook nil)
+           (parameter (append eldoc-box-frame-parameters
+                              `((default-minibuffer-frame . ,(selected-frame))
+                                (minibuffer . ,(minibuffer-window))
+                                (left-fringe . ,(frame-char-width)))))
+           window frame
+           (main-frame (selected-frame)))
+      (if (and eldoc-box--frame (frame-live-p eldoc-box--frame))
+          (progn (setq frame eldoc-box--frame)
+                 (setq window (frame-selected-window frame))
+                 ;; in case the main frame changed
+                 (set-frame-parameter frame 'parent-frame main-frame))
+        (setq window (display-buffer-in-child-frame
+                      buffer
+                      `((child-frame-parameters . ,parameter))))
+        (setq frame (window-frame window)))
+      (set-face-attribute 'fringe frame :background nil :inherit 'eldoc-box-body)
+      (fringe-mode 3)
+      (set-window-dedicated-p window t)
+      (redirect-frame-focus frame (frame-parent frame))
+      (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
+      ;; set size
+      (eldoc-box--update-childframe-geometry frame window)
+      (setq eldoc-box--frame frame)
+      (run-hook-with-args 'eldoc-box-frame-hook main-frame)
+      (make-frame-visible frame))))
 
 
 ;;;;; ElDoc
