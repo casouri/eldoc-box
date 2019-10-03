@@ -134,46 +134,58 @@ Each function runs inside the new frame and receives the main frame as argument.
   (when eldoc-box--frame
     (make-frame-invisible eldoc-box--frame t)))
 
+(defun eldoc-box--enable ()
+  "Enable eldoc-box hover.
+Intended for internal use."
+  (add-function :before-until (local 'eldoc-message-function)
+                #'eldoc-box--eldoc-message-function)
+  (when eldoc-box-clear-with-C-g
+    (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
+
+(defun eldoc-box--disable ()
+  "Disable eldoc-box hover.
+Intended for internal use."
+  (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
+  (advice-remove #'keyboard-quit #'eldoc-box-quit-frame)
+  ;; if minor mode is turned off when childframe is visible
+  ;; hide it
+  (when eldoc-box--frame
+    (delete-frame eldoc-box--frame)
+    (setq eldoc-box--frame nil)))
+
+;; please compiler
+(defvar eldoc-box-hover-at-point-mode)
+(declare-function eldoc-box-hover-at-point-mode "eldoc-box.el")
+
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-mode
   "Displays hover documentations in a childframe. This mode is buffer local."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
-      (progn (add-function :before-until (local 'eldoc-message-function)
-                           #'eldoc-box--eldoc-message-function)
-             (when eldoc-box-clear-with-C-g
-               (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
-    (when eldoc-box-hover-at-point-mode
-      (eldoc-box-hover-at-point-mode -1))
-    (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
-    (advice-remove #'keyboard-quit #'eldoc-box-quit-frame)
-    ;; if minor mode is turned off when childframe is visible
-    ;; hide it
-    (when eldoc-box--frame
-      (delete-frame eldoc-box--frame)
-      (setq eldoc-box--frame nil))))
+      (progn (when eldoc-box-hover-at-point-mode
+               (eldoc-box-hover-at-point-mode -1))
+             (eldoc-box--enable))
+    (eldoc-box--disable)))
 
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-at-point-mode
   "A convenient minor mode to display doc at point.
 You can use C-g to hide the doc."
-  :lighter ""
-  (if eldoc-box-hover-mode
-      (if eldoc-box-hover-at-point-mode
-          (progn (setq-local
-                  eldoc-box-position-function
-                  #'eldoc-box--default-at-point-position-function)
-                 (setq-local eldoc-box-clear-with-C-g t)
-                 ;; always kill frame instead of using maybe-cleanup
-                 (remove-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
-                 ;; (add-hook 'pre-command-hook #'eldoc-box-quit-frame t t)
-                 (add-hook 'post-command-hook #'eldoc-box--follow-cursor t t))
-        (add-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
-        ;; (remove-hook 'pre-command-hook #'eldoc-box-quit-frame t)
-        (remove-hook 'post-command-hook #'eldoc-box--follow-cursor t)
-        (kill-local-variable 'eldoc-box-position-function)
-        (kill-local-variable 'eldoc-box-clear-with-C-g))
-    (message "Enable eldoc-box-hover-mode first")))
+  :lighter " ELDOC-BOX"
+  (if eldoc-box-hover-at-point-mode
+      (progn (when eldoc-box-hover-mode
+               (eldoc-box-hover-mode -1))
+             (setq-local eldoc-box-position-function
+                         #'eldoc-box--default-at-point-position-function)
+             (setq-local  eldoc-box-clear-with-C-g t)
+             (remove-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
+             (add-hook 'post-command-hook #'eldoc-box--follow-cursor t t)
+             (eldoc-box--enable))
+    (eldoc-box--disable)
+    (add-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
+    (remove-hook 'post-command-hook #'eldoc-box--follow-cursor t)
+    (kill-local-variable 'eldoc-box-position-function)
+    (kill-local-variable 'eldoc-box-clear-with-C-g)))
 
 ;;;; Backstage
 ;;;;; Variable
@@ -336,7 +348,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
            (or (and (not eldoc-last-message) ; 1
                     (not (eq (point) eldoc-box--last-point)) ; 2
                     (not (eq (current-buffer) (get-buffer eldoc-box--buffer)))) ; 3
-               (not eldoc-box-hover-mode))) ; 4
+               (not (or eldoc-box-hover-mode eldoc-box-hover-at-point-mode)))) ; 4
       ;; 1. Obviously, last-message nil means we are not on a valid symbol anymore.
       ;; 2. Or are we? If you scroll the childframe with mouse wheel
       ;; `eldoc-pre-command-refresh-echo-area' will set `eldoc-last-message' to nil.
