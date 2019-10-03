@@ -80,7 +80,8 @@ in that mode the childframe is cleared as soon as point moves.")
     (internal-border-width . 1)
     (vertical-scroll-bars . nil)
     (horizontal-scroll-bars . nil)
-    (right-fringe . 0)
+    (right-fringe . 3)
+    (left-fringe . 3)
     (menu-bar-lines . 0)
     (tool-bar-lines . 0)
     (line-spacing . 0)
@@ -349,8 +350,11 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                       buffer
                       `((child-frame-parameters . ,parameter))))
         (setq frame (window-frame window)))
+      ;; workaround
+      ;; (set-frame-parameter frame 'left-fringe (alist-get 'left-fringe eldoc-box-frame-parameters))
+      ;; (set-frame-parameter frame 'right-fringe (alist-get 'right-fringe eldoc-box-frame-parameters))
+
       (set-face-attribute 'fringe frame :background nil :inherit 'eldoc-box-body)
-      (fringe-mode 3)
       (set-window-dedicated-p window t)
       (redirect-frame-focus frame (frame-parent frame))
       (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
