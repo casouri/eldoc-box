@@ -80,7 +80,8 @@ in that mode the childframe is cleared as soon as point moves.")
     (internal-border-width . 1)
     (vertical-scroll-bars . nil)
     (horizontal-scroll-bars . nil)
-    (right-fringe . 0)
+    (right-fringe . 3)
+    (left-fringe . 3)
     (menu-bar-lines . 0)
     (tool-bar-lines . 0)
     (line-spacing . 0)
@@ -124,6 +125,10 @@ Run inside the new buffer.")
   "Hook run after doc frame is setup but just before it is made visible.
 Each function runs inside the new frame and receives the main frame as argument.")
 
+(defvar eldoc-box-self-insert-command-list '(self-insert-command outshine-self-insert-command)
+  "Commands in this list are considered self-insert-command by eldoc-box.
+See `eldoc-box-inhibit-display-when-moving'.")
+
 ;;;;; Function
 (defvar eldoc-box--inhibit-childframe nil
   "If non-nil, inhibit display of childframe.")
@@ -162,7 +167,8 @@ Intended for internal use."
 
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-mode
-  "Displays hover documentations in a childframe. This mode is buffer local."
+  "Displays hover documentations in a childframe.
+The default position of childframe is upper corner."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-mode
       (progn (when eldoc-box-hover-at-point-mode
@@ -246,8 +252,9 @@ WINDOW nil means use selected window."
     (when pos-in-window
       ;; change absolute to relative to native frame
       (let ((edges (window-edges window t nil t)))
-	(cons (+ (nth 0 edges) (nth 0 pos-in-window))
-	      (+ (nth 1 edges) (nth 1 pos-in-window)))))))
+	(cons (+ (nth 0 edges) (nth 0 pos-in-window)) ; x
+              (+ (nth 1 edges) (nth 1 pos-in-window)
+                 (- (window-header-line-height window)))))))) ; y
 
 (defun eldoc-box--default-at-point-position-function-1 (width height)
   "See `eldoc-box--default-at-point-position-function'."
@@ -313,11 +320,12 @@ Intended for follow-cursor to disable display when moving cursor.")
 
 (defun eldoc-box--follow-cursor ()
   "Make childframe follow cursor in at-point mode."
-  (if (not (equal this-command #'self-insert-command))
-      (eldoc-box--inhibit-childframe-for 0.2)
-    (when (frame-live-p eldoc-box--frame)
-      (eldoc-box--update-childframe-geometry
-       eldoc-box--frame (frame-selected-window eldoc-box--frame)))))
+  (if (member this-command eldoc-box-self-insert-command-list)
+      (progn (when (frame-live-p eldoc-box--frame)
+               (eldoc-box--update-childframe-geometry
+                eldoc-box--frame (frame-selected-window eldoc-box--frame))))
+    ;; if not typing, inhibit display
+    (eldoc-box--inhibit-childframe-for 0.2)))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
@@ -342,8 +350,11 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                       buffer
                       `((child-frame-parameters . ,parameter))))
         (setq frame (window-frame window)))
+      ;; workaround
+      ;; (set-frame-parameter frame 'left-fringe (alist-get 'left-fringe eldoc-box-frame-parameters))
+      ;; (set-frame-parameter frame 'right-fringe (alist-get 'right-fringe eldoc-box-frame-parameters))
+
       (set-face-attribute 'fringe frame :background nil :inherit 'eldoc-box-body)
-      (fringe-mode 3)
       (set-window-dedicated-p window t)
       (redirect-frame-focus frame (frame-parent frame))
       (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
