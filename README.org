@@ -18,7 +18,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]]
 * Usage
 ** Function
 - =eldoc-box-hover-mode= :: Display documentation of the symbol at point in a childframe on upper corner.
-- =eldoc-box-hover-at-point-mode= :: If you enable this minor mode *on top of* =eldoc-box-hover-mode=, the childframe is displayed at point, instead of on the upper corner.
+- =eldoc-box-hover-at-point-mode= :: Same as =eldoc-box-hover-mode= except the childframe is displayed at point, instead of on the upper corner.
 - =eldoc-box-eglot-help-at-point= :: See below.
 ** Face
 -  =eldoc-box-border= :: Adjust =:background= of this face for border color.
@@ -31,6 +31,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]]
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
 - =eldoc-box-cleanup-interval= :: After this amount of seconds will eldoc-box attempt to cleanup the childframe. E.g. if it is set to 1, the childframe is cleared 1 second after you moved the point to somewhere else (that doesn't have a doc to show). This doesn't apply to =eldoc-box-hover-at-point-mode=, in that mode the childframe is cleared as soon as point moves.
 - =eldoc-box-fringe-use-same-bg= :: T means fringe's background color is set to as same as that of default. Default to t.
+- =eldoc-box-self-insert-command-list= :: By default =eldoc-box-hover-at-point-mode= only keeps childframe display while you are typing (=self-insert-command=). But if you bind something else to your keys, eldoc-box can’t recognize it and will hide childframe while yu hit that key. Add your command to this list so eldoc-box won’t hide childframe when this command is called.
 
 ** Use with eglot
 As of writing this README, eglot doesn't have a public mode hook, use this hook:
