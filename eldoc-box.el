@@ -242,21 +242,17 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
         ;; y position + a little padding (16)
         16))
 
-(defun eldoc-box--point-position-relative-to-native-frame (&optional position window)
-  "Return (X . Y) as the coordinate of POSITION in WINDOW.
+(defun eldoc-box--point-position-relative-to-native-frame (&optional point window)
+  "Return (X . Y) as the coordinate of POINT in WINDOW.
 The coordinate is relative to the native frame.
 
 WINDOW nil means use selected window."
-  (let* ((window (window-normalize-window window t))
-	 (pos-in-window
-	  (pos-visible-in-window-p
-	   (or position (window-point window)) window t)))
-    (when pos-in-window
-      ;; change absolute to relative to native frame
-      (let ((edges (window-edges window t nil t)))
-	(cons (+ (nth 0 edges) (nth 0 pos-in-window)) ; x
-              (+ (nth 1 edges) (nth 1 pos-in-window)
-                 (- (window-header-line-height window)))))))) ; y
+  (let* ((pos (pos (posn-at-point point window)))
+         (x-y (posn-x-y pos))
+         (window (posn-window pos))
+         (edges (window-body-pixel-edges window)))
+    (cons (+ (car x-y) (car edges))
+          (+ (cdr x-y) (cadr edges)))))
 
 (defun eldoc-box--default-at-point-position-function-1 (width height)
   "See `eldoc-box--default-at-point-position-function'."
