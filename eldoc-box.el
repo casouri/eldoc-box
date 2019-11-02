@@ -247,13 +247,12 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
 The coordinate is relative to the native frame.
 
 WINDOW nil means use selected window."
-  (let* ((pos (posn-at-point point window))
-         (x-y (posn-x-y pos))
-         (window (posn-window pos))
+  (let* ((pos (pos-visible-in-window-p point window t))
+         (x (car pos))
+         (y (cadr pos))
          (edges (window-body-pixel-edges window)))
-    (cons (+ (car x-y) (car edges))
-          (+ (cdr x-y) (cadr edges)
-             (- (window-header-line-height window))))))
+    (cons (+ x (car edges))
+          (+ y (cadr edges)))))
 
 (defun eldoc-box--default-at-point-position-function-1 (width height)
   "See `eldoc-box--default-at-point-position-function'."
