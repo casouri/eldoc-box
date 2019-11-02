@@ -247,7 +247,7 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
 The coordinate is relative to the native frame.
 
 WINDOW nil means use selected window."
-  (let* ((pos (pos (posn-at-point point window)))
+  (let* ((pos (posn-at-point point window))
          (x-y (posn-x-y pos))
          (window (posn-window pos))
          (edges (window-body-pixel-edges window)))
