@@ -465,9 +465,10 @@ If (point) != last point, cleanup frame.")
 (defun eldoc-box--at-point-x-by-company ()
   "Return the x position that accommodates company's popup."
   (if (and (featurep 'company) company-pseudo-tooltip-overlay)
-      (* (frame-char-width)
-         (+ (overlay-get company-pseudo-tooltip-overlay 'company-width)
-            (overlay-get company-pseudo-tooltip-overlay 'company-column)))
+      (+ (* (frame-char-width)
+            (+ (overlay-get company-pseudo-tooltip-overlay 'company-width)
+               (overlay-get company-pseudo-tooltip-overlay 'company-column)))
+         (or (line-number-display-width t) 0))
     nil))
 
 (provide 'eldoc-box)
