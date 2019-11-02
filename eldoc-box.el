@@ -252,7 +252,8 @@ WINDOW nil means use selected window."
          (window (posn-window pos))
          (edges (window-body-pixel-edges window)))
     (cons (+ (car x-y) (car edges))
-          (+ (cdr x-y) (cadr edges)))))
+          (+ (cdr x-y) (cadr edges)
+             (- (window-header-line-height window))))))
 
 (defun eldoc-box--default-at-point-position-function-1 (width height)
   "See `eldoc-box--default-at-point-position-function'."
