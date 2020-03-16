@@ -250,7 +250,7 @@ WINDOW nil means use selected window."
   (let* ((pos (pos-visible-in-window-p point window t))
          (x (car pos))
          (y (cadr pos))
-         (edges (window-body-pixel-edges window)))
+         (edges (window-edges window nil nil t)))
     (cons (+ x (car edges))
           (+ y (cadr edges)))))
 
