@@ -13,9 +13,11 @@ Get the file, add to load path, and
 (require 'eldoc-box)
 #+END_SRC
 
-It is also available on [[https://melpa.org/#/eldoc-box][MELPA]]
+It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 
 * Usage
+*Note:* If you use Gnome and Emacs 27, set ~x-gtk-resize-child-frames~ to ~resize-mode~ to avoid breakage of childframe.
+
 ** Function
 - =eldoc-box-hover-mode= :: Display documentation of the symbol at point in a childframe on upper corner.
 - =eldoc-box-hover-at-point-mode= :: Same as =eldoc-box-hover-mode= except the childframe is displayed at point, instead of on the upper corner.
