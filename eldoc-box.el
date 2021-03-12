@@ -145,7 +145,7 @@ See `eldoc-box-inhibit-display-when-moving'.")
 (defun eldoc-box--enable ()
   "Enable eldoc-box hover.
 Intended for internal use."
-  (add-function :before-until (local 'eldoc-message-function)
+  (add-function :before-while (local 'eldoc-message-function)
                 #'eldoc-box--eldoc-message-function)
   (when eldoc-box-clear-with-C-g
     (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
@@ -405,8 +405,10 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
   (when (and (stringp str) (not (equal str "")))
-    (let ((doc (apply #'format str args)))
-      (unless (and eldoc-box-only-multi-line (eq (cl-count ?\n doc) 0))
+    (let* ((doc (apply #'format str args))
+	   (multi-line-p (and eldoc-box-only-multi-line
+			      (eq (cl-count ?\n doc) 0))))
+      (unless multi-line-p
         (eldoc-box--display doc)
         (setq eldoc-box--last-point (point))
         ;; Why a timer? ElDoc is mainly used in minibuffer,
@@ -417,8 +419,8 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
         ;; in `pre-command-hook', which means the timer is reset before every
         ;; command if `eldoc-box-hover-mode' is on and `eldoc-last-message' is not nil.
         (setq eldoc-box--cleanup-timer
-              (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup))))
-    t))
+              (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup)))
+      multi-line-p)))
 
 ;;;; Eglot helper
 
