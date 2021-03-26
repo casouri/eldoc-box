@@ -405,10 +405,10 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
   (when (and (stringp str) (not (equal str "")))
-    (let* ((doc (apply #'format str args))
-	   (multi-line-p (and eldoc-box-only-multi-line
-			      (eq (cl-count ?\n doc) 0))))
-      (unless multi-line-p
+    (let* ((doc (string-trim-right (apply #'format str args)))
+           (single-line-p (and eldoc-box-only-multi-line
+                               (eq (cl-count ?\n doc) 0))))
+      (unless single-line-p
         (eldoc-box--display doc)
         (setq eldoc-box--last-point (point))
         ;; Why a timer? ElDoc is mainly used in minibuffer,
@@ -420,7 +420,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
         ;; command if `eldoc-box-hover-mode' is on and `eldoc-last-message' is not nil.
         (setq eldoc-box--cleanup-timer
               (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup)))
-      multi-line-p)))
+      single-line-p)))
 
 ;;;; Eglot helper
 
