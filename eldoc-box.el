@@ -38,6 +38,7 @@
 ;;
 
 (require 'cl-lib)
+(require 'seq)
 
 ;;;; Userland
 ;;;;; Variable
@@ -160,41 +161,6 @@ Intended for internal use."
   (when eldoc-box--frame
     (delete-frame eldoc-box--frame)
     (setq eldoc-box--frame nil)))
-
-;; please compiler
-(defvar eldoc-box-hover-at-point-mode)
-(declare-function eldoc-box-hover-at-point-mode "eldoc-box.el")
-
-;;;###autoload
-(define-minor-mode eldoc-box-hover-mode
-  "Displays hover documentations in a childframe.
-The default position of childframe is upper corner."
-  :lighter " ELDOC-BOX"
-  (if eldoc-box-hover-mode
-      (progn (when eldoc-box-hover-at-point-mode
-               (eldoc-box-hover-at-point-mode -1))
-             (eldoc-box--enable))
-    (eldoc-box--disable)))
-
-;;;###autoload
-(define-minor-mode eldoc-box-hover-at-point-mode
-  "A convenient minor mode to display doc at point.
-You can use C-g to hide the doc."
-  :lighter " ELDOC-BOX"
-  (if eldoc-box-hover-at-point-mode
-      (progn (when eldoc-box-hover-mode
-               (eldoc-box-hover-mode -1))
-             (setq-local eldoc-box-position-function
-                         #'eldoc-box--default-at-point-position-function)
-             (setq-local  eldoc-box-clear-with-C-g t)
-             (remove-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
-             (add-hook 'post-command-hook #'eldoc-box--follow-cursor t t)
-             (eldoc-box--enable))
-    (eldoc-box--disable)
-    (add-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
-    (remove-hook 'post-command-hook #'eldoc-box--follow-cursor t)
-    (kill-local-variable 'eldoc-box-position-function)
-    (kill-local-variable 'eldoc-box-clear-with-C-g)))
 
 ;;;; Backstage
 ;;;;; Variable
@@ -422,6 +388,37 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
               (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup)))
       single-line-p)))
 
+;;;###autoload
+(define-minor-mode eldoc-box-hover-mode
+  "Displays hover documentations in a childframe.
+The default position of childframe is upper corner."
+  :lighter " ELDOC-BOX"
+  (if eldoc-box-hover-mode
+      (progn (when eldoc-box-hover-at-point-mode
+               (eldoc-box-hover-at-point-mode -1))
+             (eldoc-box--enable))
+    (eldoc-box--disable)))
+
+;;;###autoload
+(define-minor-mode eldoc-box-hover-at-point-mode
+  "A convenient minor mode to display doc at point.
+You can use C-g to hide the doc."
+  :lighter " ELDOC-BOX"
+  (if eldoc-box-hover-at-point-mode
+      (progn (when eldoc-box-hover-mode
+               (eldoc-box-hover-mode -1))
+             (setq-local eldoc-box-position-function
+                         #'eldoc-box--default-at-point-position-function)
+             (setq-local  eldoc-box-clear-with-C-g t)
+             (remove-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
+             (add-hook 'post-command-hook #'eldoc-box--follow-cursor t t)
+             (eldoc-box--enable))
+    (eldoc-box--disable)
+    (add-hook 'pre-command-hook #'eldoc-pre-command-refresh-echo-area t)
+    (remove-hook 'post-command-hook #'eldoc-box--follow-cursor t)
+    (kill-local-variable 'eldoc-box-position-function)
+    (kill-local-variable 'eldoc-box-clear-with-C-g)))
+
 ;;;; Eglot helper
 
 (defvar eldoc-box-eglot-help-at-point-last-point 0
@@ -438,6 +435,11 @@ If (point) != last point, cleanup frame.")
 
 (defvar eglot--managed-mode)
 (declare-function eglot--dbind "eglot.el")
+(declare-function eglot--hover-info "eglot.el")
+(declare-function eglot--current-server-or-lose "eglot.el")
+(declare-function eglot--TextDocumentPositionParams "eglot.el")
+(declare-function eglot--error "eglot.el")
+(declare-function jsonrpc-request "jsonrpc")
 
 
 (defun eldoc-box-eglot-help-at-point ()
