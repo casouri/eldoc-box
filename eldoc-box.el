@@ -115,6 +115,14 @@ Set it to a function with no argument
 if you want to dynamically change the maximum height."
   :type 'number)
 
+(defcustom eldoc-box-offset '(16 16 16)
+  "Sets left, right & top offset of the doc childframe.
+Its value should be a list: (left right top)"
+  :type '(list
+          (integer :tag "Left")
+          (integer :tag "Right")
+          (integer :tag "Top")))
+
 (defvar eldoc-box-position-function #'eldoc-box--default-upper-corner-position-function
   "Eldoc-box uses this function to set childframe's position.
 This should be a function that returns a (X . Y) cons cell.
@@ -207,13 +215,15 @@ Intended for internal use."
   "The default function to set childframe position.
 Used by `eldoc-box-position-function'.
 Position is calculated base on WIDTH and HEIGHT of childframe text window"
-  (cons (pcase (eldoc-box--window-side) ; x position + a little padding (16)
-          ;; display doc on right
-          ('left (- (frame-outer-width (selected-frame)) width 16))
-          ;; display doc on left
-          ('right 16))
-        ;; y position + a little padding (16)
-        16))
+  (pcase-let ((`(,offset-l ,offset-r ,offset-t) eldoc-box-offset))
+    (cons (pcase (eldoc-box--window-side) ; x position + offset
+            ;; display doc on right
+            ('left (- (frame-outer-width (selected-frame)) width offset-r))
+            ;; display doc on left
+            ('right offset-l))
+          ;; y position + v-offset
+          offset-t)
+    ))
 
 (defun eldoc-box--point-position-relative-to-native-frame (&optional point window)
   "Return (X . Y) as the coordinate of POINT in WINDOW.
