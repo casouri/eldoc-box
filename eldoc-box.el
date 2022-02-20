@@ -348,7 +348,8 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
       ;; set size
       (eldoc-box--update-childframe-geometry frame window)
       (setq eldoc-box--frame frame)
-      (run-hook-with-args 'eldoc-box-frame-hook main-frame)
+      (with-selected-frame frame
+        (run-hook-with-args 'eldoc-box-frame-hook main-frame))
       (make-frame-visible frame))))
 
 
