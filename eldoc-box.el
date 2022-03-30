@@ -475,12 +475,15 @@ If (point) != last point, cleanup frame.")
   (interactive)
   (when eglot--managed-mode
     (let ((eldoc-box-position-function #'eldoc-box--default-at-point-position-function))
-      (eldoc-box--display
-       (eglot--dbind ((Hover) contents range)
-                     (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
-                                      (eglot--TextDocumentPositionParams))
-                     (when (seq-empty-p contents) (eglot--error "No hover info here"))
-                     (eglot--hover-info contents range))))
+      (let ((hover-info
+             (eglot--dbind ((Hover) contents range)
+                 (jsonrpc-request (eglot--current-server-or-lose) :textDocument/hover
+                                  (eglot--TextDocumentPositionParams))
+               (when (seq-empty-p contents) (eglot--error "No hover info here"))
+               (eglot--hover-info contents range))))
+        (if hover-info
+            (eldoc-box--display hover-info)
+          (eglot--error "No hover info here"))))
     (setq eldoc-box-eglot-help-at-point-last-point (point))
     (run-with-timer 0.1 nil #'eldoc-box--eglot-help-at-point-cleanup)))
 
