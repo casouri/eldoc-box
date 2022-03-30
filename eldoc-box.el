@@ -40,6 +40,11 @@
 (require 'cl-lib)
 (require 'seq)
 
+;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Compiling-Macros.html
+(eval-when-compile
+  (require 'jsonrpc)
+  (require 'eglot))
+
 ;;;; Userland
 ;;;;; Variable
 (defgroup eldoc-box nil
