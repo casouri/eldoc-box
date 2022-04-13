@@ -38,7 +38,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 ** Use with eglot
 As of writing this README, eglot doesn't have a public mode hook, use this hook:
 #+BEGIN_SRC emacs-lisp
-(add-hook 'eglot--managed-mode-hook #'eldoc-box-hover-mode t)
+(add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode t)
 #+END_SRC
 
 To keep eldoc from displaying documentation at point without enabling any minor mode above: =(add-to-list 'eglot-ignored-server-capabilites :hoverProvider)=.
