@@ -9,7 +9,7 @@
 ;; Contributors:
 ;;   João Távora <joaotavora@gmail.com>
 ;; URL: https://github.com/casouri/eldoc-box
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "27.1"))
 
 ;;; License
 ;;
@@ -72,7 +72,7 @@ in that mode the childframe is cleared as soon as point moves."
   :type 'number)
 
 (defcustom eldoc-box-clear-with-C-g nil
-  "If set to non-nil, eldoc-box clears childframe when you hit \C-g."
+  "If set to non-nil, eldoc-box clears childframe on \\[keyboard-quit]."
   :type 'boolean)
 
 (defvar eldoc-box-frame-parameters
@@ -147,7 +147,7 @@ Run inside the new buffer.")
 Each function runs inside the new frame and receives the main frame as argument.")
 
 (defcustom eldoc-box-self-insert-command-list '(self-insert-command outshine-self-insert-command)
-  "Commands in this list are considered self-insert-command by eldoc-box.
+  "Commands in this list are considered `self-insert-command' by eldoc-box.
 See `eldoc-box-inhibit-display-when-moving'."
   :type '(repeat symbol))
 
@@ -210,8 +210,9 @@ STR has to be a proper documentation, not empty string, not nil, etc."
 
 
 (defun eldoc-box--window-side ()
-  "Return 'left if the selected window is on the left,
-'right if on the right. Return 'left if there is only one window."
+  "Return the side of the selected window.
+Symbol 'left if the selected window is on the left,'right if on the right.
+Return 'left if there is only one window."
   (let ((left-window(window-at 0 0)))
     (if (eq left-window (selected-window))
         'left
@@ -228,8 +229,7 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
             ;; display doc on left
             ('right offset-l))
           ;; y position + v-offset
-          offset-t)
-    ))
+          offset-t)))
 
 (defun eldoc-box--point-position-relative-to-native-frame (&optional point window)
   "Return (X . Y) as the coordinate of POINT in WINDOW.
@@ -246,7 +246,7 @@ WINDOW nil means use selected window."
           (+ y (cadr edges)))))
 
 (defun eldoc-box--default-at-point-position-function-1 (width height)
-  "See `eldoc-box--default-at-point-position-function'."
+  "See `eldoc-box--default-at-point-position-function' for WIDTH & HEIGHT docs."
   (let* ((point-pos (eldoc-box--point-position-relative-to-native-frame))
          ;; calculate point coordinate relative to native frame
          ;; because childframe coordinate is relative to native frame
@@ -267,8 +267,9 @@ WINDOW nil means use selected window."
             (+ y em)))))
 
 (defun eldoc-box--default-at-point-position-function (width height)
-  "Set `eldoc-box-position-function' to this function to have childframe appear under point.
-Position is calculated base on WIDTH and HEIGHT of childframe text window."
+  "Set `eldoc-box-position-function' to this function.
+To have childframe appear under point.  Position is calculated
+base on WIDTH and HEIGHT of childframe text window."
   (let* ((pos (eldoc-box--default-at-point-position-function-1 width height))
          (x (car pos))
          (y (cdr pos)))
@@ -397,7 +398,8 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
           (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup))))
 
 (defun eldoc-box--eldoc-message-function (str &rest args)
-  "Front-end for eldoc. Display STR in childframe and ARGS works like `message'."
+  "Front-end for eldoc.
+Display STR in childframe and ARGS works like `message'."
   (when (and (stringp str) (not (equal str "")))
     (let* ((doc (string-trim-right (apply #'format str args)))
            (single-line-p (and eldoc-box-only-multi-line
@@ -430,7 +432,7 @@ The default position of childframe is upper corner."
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-at-point-mode
   "A convenient minor mode to display doc at point.
-You can use C-g to hide the doc."
+You can use \[keyboard-quit] to hide the doc."
   :lighter " ELDOC-BOX"
   (if eldoc-box-hover-at-point-mode
       (progn (when eldoc-box-hover-mode
