@@ -185,6 +185,8 @@ Intended for internal use."
 
 ;;;;; Function
 
+;; Please compiler.
+(defvar eldoc-box-hover-mode)
 (defun eldoc-box--display (str)
   "Display STR in childframe.
 STR has to be a proper documentation, not empty string, not nil, etc."
@@ -364,6 +366,8 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
   ;; used in `eldoc-box--maybe-cleanup'
   "Last point when eldoc-box showed childframe.")
 
+;; Please compiler.
+(defvar eldoc-box-hover-at-point-mode)
 (defun eldoc-box--maybe-cleanup ()
   "Clean up after ElDoc."
   ;; timer is global, so this function will be called outside
