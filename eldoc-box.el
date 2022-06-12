@@ -202,6 +202,7 @@ STR has to be a proper documentation, not empty string, not nil, etc."
       (erase-buffer)
       (insert str)
       (goto-char (point-min))
+      (visual-line-mode)
       (run-hook-with-args 'eldoc-box-buffer-hook))
     (eldoc-box--get-frame doc-buffer)))
 
