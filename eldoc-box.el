@@ -317,29 +317,24 @@ FRAME is the childframe, WINDOW is the primary window."
     ;; move position
     (set-frame-position frame (car pos) (cdr pos))))
 
-(defvar eldoc-box--inhibit-childframe-timer nil
-  "When this timer is on, inhibit childframe display.
-Intended for follow-cursor to disable display when moving cursor.")
-
 (defun eldoc-box--inhibit-childframe-for (sec)
-  "Inhibit display of childframe for SEC seconds."
-  (when eldoc-box--inhibit-childframe-timer
-    (cancel-timer eldoc-box--inhibit-childframe-timer))
-  (eldoc-box-quit-frame)
-  (setq eldoc-box--inhibit-childframe t
-        eldoc-box--inhibit-childframe-timer
-        (run-with-timer sec nil
-                        (lambda ()
-                          (setq eldoc-box--inhibit-childframe nil)))))
+  "Inhibit display of childframe for SEC seconds after Emacs is idle again."
+  (unless eldoc-box--inhibit-childframe
+    (setq eldoc-box--inhibit-childframe t)
+    (eldoc-box-quit-frame)
+    (run-with-idle-timer sec nil
+                    (lambda ()
+                      (setq eldoc-box--inhibit-childframe nil)))))
 
 (defun eldoc-box--follow-cursor ()
   "Make childframe follow cursor in at-point mode."
-  (if (member this-command eldoc-box-self-insert-command-list)
-      (progn (when (frame-live-p eldoc-box--frame)
-               (eldoc-box--update-childframe-geometry
-                eldoc-box--frame (frame-selected-window eldoc-box--frame))))
-    ;; if not typing, inhibit display
-    (eldoc-box--inhibit-childframe-for 0.2)))
+  (unless eldoc-box--inhibit-childframe
+    (if (member this-command eldoc-box-self-insert-command-list)
+        (progn (when (frame-live-p eldoc-box--frame)
+                 (eldoc-box--update-childframe-geometry
+                  eldoc-box--frame (frame-selected-window eldoc-box--frame))))
+      ;; if not typing, inhibit display
+      (eldoc-box--inhibit-childframe-for 0.5))))
 
 (defun eldoc-box--get-frame (buffer)
   "Return a childframe displaying BUFFER.
