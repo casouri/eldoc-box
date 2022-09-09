@@ -156,7 +156,7 @@ See `eldoc-box-inhibit-display-when-moving'."
 (defun eldoc-box-quit-frame ()
   "Hide childframe used by eglot doc."
   (interactive)
-  (when eldoc-box--frame
+  (when (and eldoc-box--frame (frame-live-p eldoc-box--frame))
     (make-frame-invisible eldoc-box--frame t)))
 
 (defun eldoc-box--enable ()
