@@ -52,7 +52,7 @@
   "The border color used in childframe.")
 
 (defface eldoc-box-body '((t . (:background nil)))
-  "Body face used in eglot doc childframe.")
+  "Body face used in documentation childframe.")
 
 (defcustom eldoc-box-only-multi-line nil
   "If non-nil, only use childframe when there are more than one line."
@@ -154,7 +154,7 @@ See `eldoc-box-inhibit-display-when-moving'."
   "The frame to display doc.")
 
 (defun eldoc-box-quit-frame ()
-  "Hide childframe used by eglot doc."
+  "Hide documentation childframe."
   (interactive)
   (when (and eldoc-box--frame (frame-live-p eldoc-box--frame))
     (make-frame-invisible eldoc-box--frame t)))
@@ -207,7 +207,7 @@ If (point) != last point, cleanup frame.")
 ;;;; Backstage
 ;;;;; Variable
 (defvar eldoc-box--buffer " *eldoc-box*"
-  "The buffer used to display eglot doc.")
+  "The buffer used to display documentation.")
 
 ;;;;; Function
 
