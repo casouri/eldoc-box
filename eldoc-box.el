@@ -219,6 +219,7 @@ STR has to be a proper documentation, not empty string, not nil, etc."
   (let ((doc-buffer (get-buffer-create eldoc-box--buffer)))
     (with-current-buffer doc-buffer
       (setq mode-line-format nil)
+      (setq header-line-format nil)
       (when (bound-and-true-p global-tab-line-mode)
         (setq tab-line-format nil))
       ;; without this, clicking childframe will make doc buffer the current buffer
