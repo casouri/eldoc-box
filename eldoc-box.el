@@ -162,18 +162,31 @@ See `eldoc-box-inhibit-display-when-moving'."
 (defun eldoc-box--enable ()
   "Enable eldoc-box hover.
 Intended for internal use."
-  (add-function :before-while (local 'eldoc-message-function)
-                #'eldoc-box--eldoc-message-function)
+  (if (not (boundp 'eldoc-display-functions))
+      (add-function :before-while (local 'eldoc-message-function)
+                    #'eldoc-box--eldoc-message-function)
+
+    (setq-local eldoc-display-functions
+                (cons 'eldoc-box--eldoc-display-function
+                      (remq 'eldoc-display-in-echo-area
+                            eldoc-display-functions))))
+
   (when eldoc-box-clear-with-C-g
     (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
 
 (defun eldoc-box--disable ()
   "Disable eldoc-box hover.
 Intended for internal use."
-  (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
+  (if (not (boundp 'eldoc-display-functions))
+      (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
+
+    (setq-local eldoc-display-functions
+                (cons 'eldoc-display-in-echo-area
+                      (remq 'eldoc-box--eldoc-display-function
+                            eldoc-display-functions))))
+
   (advice-remove #'keyboard-quit #'eldoc-box-quit-frame)
-  ;; if minor mode is turned off when childframe is visible
-  ;; hide it
+  ;; If minor mode is turned off when childframe is visible, hide it.
   (when eldoc-box--frame
     (delete-frame eldoc-box--frame)
     (setq eldoc-box--frame nil)))
@@ -418,13 +431,45 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
     (setq eldoc-box--cleanup-timer
           (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup))))
 
+(defun eldoc-box--count-newlines (str)
+  "Count the number of newlines in STR, excluding invisible ones.
+Trailing newlines doesn’t count."
+  (let ((idx 0)
+        (count 0)
+        (last-visible-newline nil)
+        (len (length str))
+        ;; Is the last visible newline a trailing newline?
+        (last-newline-trailing-p nil))
+
+    ;; Count visible newlines in STR.
+    (while (and (not (eq idx len))
+                (setq idx (string-search "\n" str
+                                         (if (eq idx 0) 0 (1+ idx)))))
+      (unless (memq 'invisible (text-properties-at idx str))
+        (setq last-visible-newline idx)
+        (cl-incf count)))
+
+    ;; If there is any visible character after the last newline, it is
+    ;; not a trailing newline.
+    (when last-visible-newline
+      (setq last-newline-trailing-p t)
+      (let ((idx (1+ last-visible-newline)))
+        (while (< idx len)
+          (when (not (memq 'invisible (text-properties-at idx str)))
+            (setq last-newline-trailing-p nil))
+          (cl-incf idx))))
+
+    (if last-newline-trailing-p
+        (1- count)
+      count)))
+
 (defun eldoc-box--eldoc-message-function (str &rest args)
   "Front-end for eldoc.
 Display STR in childframe and ARGS works like `message'."
   (when (and (stringp str) (not (equal str "")))
     (let* ((doc (string-trim-right (apply #'format str args)))
            (single-line-p (and eldoc-box-only-multi-line
-                               (eq (cl-count ?\n doc) 0))))
+                               (eq (eldoc-box--count-newlines doc) 0))))
       (unless single-line-p
         (eldoc-box--display doc)
         (setq eldoc-box--last-point (point))
@@ -437,7 +482,19 @@ Display STR in childframe and ARGS works like `message'."
         ;; command if `eldoc-box-hover-mode' is on and `eldoc-last-message' is not nil.
         (setq eldoc-box--cleanup-timer
               (run-with-timer eldoc-box-cleanup-interval nil #'eldoc-box--maybe-cleanup)))
+      ;; Return nil to stop ‘eldoc--message’ from running, because
+      ;; this function is added as a ‘:before-while’ advice.
       single-line-p)))
+
+(defun eldoc-box--eldoc-display-function (docs interactive)
+  "Display DOCS in childframe.
+For DOCS and INTERACTIVE see ‘eldoc-display-functions’. Maybe
+display the docs in echo area depending on
+‘eldoc-box-only-multi-line’."
+  (let ((doc (string-trim (string-join (mapcar #'car docs)
+                                       "\n\n"))))
+    (when (eldoc-box--eldoc-message-function "%s" doc)
+      (eldoc-display-in-echo-area docs interactive))))
 
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-mode
