@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2017-2018 Sebastien Chapuis, 2018 Yuan Fu
 
-;; Version: 1.8
+;; Version: 1.10
 
 ;; Author: Sebastien Chapuis <sebastien@chapu.is>
 ;; Maintainer: Yuan Fu <casouri@gmail.com>
