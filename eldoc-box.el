@@ -248,8 +248,8 @@ STR has to be a proper documentation, not empty string, not nil, etc."
 
 (defun eldoc-box--window-side ()
   "Return the side of the selected window.
-Symbol 'left if the selected window is on the left,'right if on the right.
-Return 'left if there is only one window."
+Symbol ‘left’ if the selected window is on the left, ‘right’ if
+on the right. Return ‘left’ if there is only one window."
   (let ((left-window(window-at 0 0)))
     (if (eq left-window (selected-window))
         'left
