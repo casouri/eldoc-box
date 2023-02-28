@@ -21,13 +21,16 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 ** Function
 - =eldoc-box-hover-mode= :: Display documentation of the symbol at point in a childframe on upper corner.
 - =eldoc-box-hover-at-point-mode= :: Same as =eldoc-box-hover-mode= except the childframe is displayed at point, instead of on the upper corner. /Note that this mode brings a small but noticeable slowness./
-- =eldoc-box-eglot-help-at-point= :: See below.
+- =eldoc-box-help-at-point= :: Display the documentation of the symbol at point in a childframe. This requires Emacs 28. (=eldoc-box-hover-mode= doesn’t need to be on.)
+
 ** Face
--  =eldoc-box-border= :: Adjust =:background= of this face for border color.
+- =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Default face used by childframe.  I suggest to use a nice Sans Serif font such as Source Sans Pro, and a lighter or darker background.
+
 ** Hooks
 - =eldoc-box-buffer-hook= :: Hook run after buffer for doc is setup.Run inside the new buffer.
 - =eldoc-box-frame-hook= :: Hook run after doc frame is setup but just before it is made visible.Each function runs inside the child frame and receives the main frame as argument.
+
 ** Variable
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: Set them according to the screen resolution of your machine.
 - =eldoc-box-only-multi-line= :: Set this to non-nil and eldoc-box only display multi-line message in childframe. One line messages are left in minibuffer.
@@ -43,7 +46,6 @@ As of writing this README, eglot doesn't have a public mode hook, use this hook:
 
 To keep eldoc from displaying documentation at point without enabling any minor mode above: =(add-to-list 'eglot-ignored-server-capabilites :hoverProvider)=.
 
-Eldoc-box also provides a convenient command =eldoc-box-eglot-help-at-point=. Calling this command on a symbol displays a documentation childframe at point. No need to enable any minor mode for this.
 
 * Contributors
 - [[https://github.com/joaotavora][João Távora]]
