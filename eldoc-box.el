@@ -206,16 +206,18 @@ If (point) != last point, cleanup frame.")
     (eldoc-box-quit-frame)
     (kill-local-variable 'eldoc-display-functions)))
 
+;;;###autoload
 (defun eldoc-box-help-at-point ()
   "Display documentation of the symbol at point."
   (interactive)
-  (let ((eldoc-box-position-function
-         #'eldoc-box--default-at-point-position-function))
-    (eldoc-box--display
-     (with-current-buffer eldoc--doc-buffer
-       (buffer-string))))
-  (setq eldoc-box--help-at-point-last-point (point))
-  (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup))
+  (when (boundp 'eldoc--doc-buffer)
+    (let ((eldoc-box-position-function
+           #'eldoc-box--default-at-point-position-function))
+      (eldoc-box--display
+       (with-current-buffer eldoc--doc-buffer
+         (buffer-string))))
+    (setq eldoc-box--help-at-point-last-point (point))
+    (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)))
 
 ;;;; Backstage
 ;;;;; Variable
