@@ -47,5 +47,6 @@ As of writing this README, eglot doesn't have a public mode hook, use this hook:
 To keep eldoc from displaying documentation at point without enabling any minor mode above: =(add-to-list 'eglot-ignored-server-capabilites :hoverProvider)=.
 
 
-* Contributors
-- [[https://github.com/joaotavora][João Távora]]
+* Credit
+- Thanks to for [[https://github.com/joaotavora][João Távora]] for some valuable contribution and explain on eldoc and eglot internals.
+- This package is initially adapted from Sebastien Chapuis’s package lsp-ui.el.

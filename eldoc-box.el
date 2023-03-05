@@ -1,13 +1,10 @@
 ;;; eldoc-box.el --- Display documentation in childframe      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2018 Sebastien Chapuis, 2018 Yuan Fu
+;; Copyright (C) 2018 Yuan Fu
 
 ;; Version: 1.10
 
-;; Author: Sebastien Chapuis <sebastien@chapu.is>
-;; Maintainer: Yuan Fu <casouri@gmail.com>
-;; Contributors:
-;;   João Távora <joaotavora@gmail.com>
+;; Author: Yuan Fu <casouri@gmail.com>
 ;; URL: https://github.com/casouri/eldoc-box
 ;; Package-Requires: ((emacs "27.1"))
 
@@ -283,7 +280,7 @@ STR has to be a proper documentation, not empty string, not nil, etc."
   "Return the side of the selected window.
 Symbol ‘left’ if the selected window is on the left, ‘right’ if
 on the right. Return ‘left’ if there is only one window."
-  (let ((left-window(window-at 0 0)))
+  (let ((left-window (window-at 0 0)))
     (if (eq left-window (selected-window))
         'left
       'right)))
