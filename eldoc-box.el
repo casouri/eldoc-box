@@ -280,7 +280,9 @@ STR has to be a proper documentation, not empty string, not nil, etc."
   "Return the side of the selected window.
 Symbol ‘left’ if the selected window is on the left, ‘right’ if
 on the right. Return ‘left’ if there is only one window."
-  (let ((left-window (window-at 0 0)))
+  (let ((left-window (if tab-bar-mode
+                         (window-at-x-y 5 (+ 5 (tab-bar-height nil t)))
+                       (window-at 0 0))))
     (if (eq left-window (selected-window))
         'left
       'right)))
