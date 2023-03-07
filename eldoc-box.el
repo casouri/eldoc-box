@@ -65,8 +65,10 @@
 
 ;;; Code:
 
-(require 'cl-lib)
-(require 'seq)
+(eval-when-compile
+  (require 'cl-lib)
+  (require 'pcase)
+  (require 'seq))
 
 ;;;; Userland
 ;;;;; Variable
@@ -164,7 +166,7 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
 (defvar eldoc-box-buffer-hook '(eldoc-box--prettify-markdown-separator
                                 eldoc-box--replace-en-space
                                 eldoc-box--remove-linked-images
-                                eldoc-box--fontify-html-header
+                                eldoc-box--fontify-html
                                 eldoc-box--condense-large-newline-gaps)
   "Hook run after buffer for doc is setup.
 Run inside the new buffer. By default, it contains some Markdown
@@ -664,9 +666,10 @@ height."
             nil t)
       (replace-match ""))))
 
-(defun eldoc-box--fontify-html-header ()
-  "Fontify <h1> <h2> tags."
+(defun eldoc-box--fontify-html ()
+  "Fontify HTML tags and special entities."
   (save-excursion
+    ;; <h1> tags.
     (goto-char (point-min))
     (while (re-search-forward
             (rx bol
@@ -682,7 +685,15 @@ height."
       (put-text-property (match-beginning 1) (match-end 1)
                          'invisible t)
       (put-text-property (match-beginning 3) (match-end 3)
-                         'invisible t))))
+                         'invisible t))
+    ;; Special entities.
+    (goto-char (point-min))
+    (while (re-search-forward (rx (or "&lt;" "&gt;")) nil t)
+      (put-text-property (match-beginning 0) (match-end 0)
+                         'display
+                         (pcase (match-string 0)
+                           ("&lt;" "<")
+                           ("&gt;" ">"))))))
 
 (provide 'eldoc-box)
 
