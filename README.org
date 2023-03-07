@@ -54,5 +54,5 @@ By default, eldoc-box tries to prettify the displayed markdown documentation as 
 [[./demo.png]]
 
 * Credit
-- Thanks to for [[https://github.com/joaotavora][João Távora]] for valuable contribution and explaining eldoc and eglot internals to me.
+- Thanks to [[https://github.com/joaotavora][João Távora]] for valuable contribution and explaining eldoc and eglot internals to me.
 - This package is initially adapted from Sebastien Chapuis’s package lsp-ui.el.
