@@ -630,11 +630,8 @@ childframe."
                                        :height 0.4)))))))
 
 (defun eldoc-box--replace-en-space ()
-  "Replace the en spaces in documentation with regular spaces."
-  (save-excursion
-    (goto-char (point-min))
-    (while (search-forward " " nil t)
-      (replace-match " "))))
+  "Display the en spaces in documentation as regular spaces."
+  (face-remap-set-base 'nobreak-space '(:inherit default)))
 
 (defun eldoc-box--condense-large-newline-gaps ()
   "Condense exceedingly large gaps made of consecutive newlines.
