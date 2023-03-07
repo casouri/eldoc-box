@@ -1,5 +1,6 @@
 #+TITLE: ElDoc box
-This package displays ElDoc documentations in a childframe.
+
+This package displays ElDoc documentations in a childframe. The childfrme is selectable and scrollable with mouse, even thought the cursor is hidden.
 
 [[https://melpa.org/#/eldoc-box][file:https://melpa.org/packages/eldoc-box-badge.svg]]
 [[https://stable.melpa.org/#/eldoc-box][file:https://stable.melpa.org/packages/eldoc-box-badge.svg]]
@@ -45,6 +46,18 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 #+END_SRC
 
 To keep eldoc from displaying documentation at point without enabling any minor mode above: =(add-to-list 'eglot-ignored-server-capabilites :hoverProvider)=.
+
+** Default prettifier
+
+By default, eldoc-box tries to prettify the displayed markdown documentation as shown below. If you wish to disable them, remove the prettifier functions from =eldoc-box-buffer-hook=. Report an issue if there are other things can be prettfied away.
+
+Before:
+
+[[./before.png]]
+
+After:
+
+[[./after.png]]
 
 
 * Credit

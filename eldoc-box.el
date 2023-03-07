@@ -161,9 +161,14 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
   "T means fringe's background color is set to as same as that of default."
   :type 'boolean)
 
-(defvar eldoc-box-buffer-hook nil
+(defvar eldoc-box-buffer-hook '(eldoc-box--prettify-markdown-separator
+                                eldoc-box--replace-en-space
+                                eldoc-box--remove-linked-images
+                                eldoc-box--fontify-html-header
+                                eldoc-box--condense-large-newline-gaps)
   "Hook run after buffer for doc is setup.
-Run inside the new buffer.")
+Run inside the new buffer. By default, it contains some Markdown
+prettifiers, which see.")
 
 (defvar eldoc-box-frame-hook nil
   "Hook run after doc frame is setup but just before it is made visible.
@@ -607,6 +612,80 @@ You can use \[keyboard-quit] to hide the doc."
                (overlay-get company-pseudo-tooltip-overlay 'company-column)))
          (or (line-number-display-width t) 0))
     nil))
+
+;;;; Markdown compatibility
+
+(defun eldoc-box--prettify-markdown-separator ()
+  "Prettify the markdown separator in doc returned by Eglot.
+Refontify the separator so they span exactly the width of the
+childframe."
+  (save-excursion
+    (goto-char (point-min))
+    (let (prop)
+      (while (setq prop (text-property-search-forward 'markdown-hr))
+        (add-text-properties (prop-match-beginning prop)
+                             (prop-match-end prop)
+                             '( display (space :width text)
+                                face ( :strike-through t
+                                       :height 0.4)))))))
+
+(defun eldoc-box--replace-en-space ()
+  "Replace the en spaces in documentation with regular spaces."
+  (save-excursion
+    (goto-char (point-min))
+    (while (search-forward " " nil t)
+      (replace-match " "))))
+
+(defun eldoc-box--condense-large-newline-gaps ()
+  "Condense exceedingly large gaps made of consecutive newlines.
+
+These gaps are usually made of hidden \"```\" and/or consecutive
+newlines. Replace those gaps with a single empty line at 0.5 line
+height."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward
+            (rx (>= 2 (or "\n" (seq "```" (+ (syntax word))) "<br>"
+                          (seq bol (+ (or " " "\t" " ")) eol))))
+            nil t)
+      (if (or (eq (match-beginning 0) (point-min))
+              (eq (match-end 0) (point-max)))
+          (replace-match "")
+        (replace-match "\n\n")
+        (add-text-properties (1- (point)) (point)
+                             '( font-lock-face (:height 0.4)
+                                face (:height 0.4)))))))
+
+(defun eldoc-box--remove-linked-images ()
+  "Some documentation embed image links in the doc...remove them."
+  (save-excursion
+    (goto-char (point-min))
+    ;; Find every Markdown image link, and remove them.
+    (while (re-search-forward
+            (rx "[" (seq "![" (+? anychar) "](" (+? anychar) ")") "]"
+                "(" (+? anychar) ")")
+            nil t)
+      (replace-match ""))))
+
+(defun eldoc-box--fontify-html-header ()
+  "Fontify <h1> <h2> tags."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward
+            (rx bol
+                (group "<h" digit ">")
+                (group (*? anychar))
+                (group "</h" digit ">")
+                eol)
+            nil t)
+      (add-text-properties (match-beginning 2)
+                           (match-end 2)
+                           '( face (:weight bold)
+                              font-lock-face (:weight bold)))
+      (put-text-property (match-beginning 1) (match-end 1)
+                         'invisible t)
+      (put-text-property (match-beginning 3) (match-end 3)
+                         'invisible t))))
 
 (provide 'eldoc-box)
 
