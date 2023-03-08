@@ -100,6 +100,17 @@ in that mode the childframe is cleared as soon as point moves."
   "If set to non-nil, eldoc-box clears childframe on \\[keyboard-quit]."
   :type 'boolean)
 
+(defcustom eldoc-box-doc-separator "\n\n"
+  "The separator between documentation from different sources.
+
+Since Emacs 28, Eldoc can combine documentation from different
+sources, this separator is used to separate documentation from
+different sources.
+
+This separator is used for the documentation shown in
+‘eldoc-box-bover-mode’ but not ‘eldoc-box-help-at-point’."
+  :type 'string)
+
 (defvar eldoc-box-frame-parameters
   '(;; make the childframe unseen when first created
     (left . -1)
@@ -548,7 +559,7 @@ display the docs in echo area depending on
 ‘eldoc-box-only-multi-line’."
   (let ((doc (string-trim (string-join
                            (mapcar #'eldoc-box--compose-doc docs)
-                           "\n\n"))))
+                           eldoc-box-doc-separator))))
     (when (eldoc-box--eldoc-message-function "%s" doc)
       (eldoc-display-in-echo-area docs interactive))))
 
