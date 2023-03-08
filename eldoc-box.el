@@ -525,13 +525,30 @@ Display STR in childframe and ARGS works like `message'."
       ;; this function is added as a ‘:before-while’ advice.
       single-line-p)))
 
+(defun eldoc-box--compose-doc (doc)
+  "Compose a doc passed from eldoc.
+
+DOC has the form of (TEXT :KEY VAL...), and KEY can be ‘:thing’
+and ‘:face’, among other things. If ‘:thing’ exists, it is put at
+the start of the doc followed by a colon. If ‘:face’ exists, it
+is applied to the thing.
+
+Return the composed string."
+  (let ((thing (plist-get (cdr doc) :thing))
+        (face (plist-get (cdr doc) :face)))
+    (concat (if thing
+                (concat (propertize (format "%s" thing) 'face face) ": ")
+              "")
+            (car doc))))
+
 (defun eldoc-box--eldoc-display-function (docs interactive)
   "Display DOCS in childframe.
 For DOCS and INTERACTIVE see ‘eldoc-display-functions’. Maybe
 display the docs in echo area depending on
 ‘eldoc-box-only-multi-line’."
-  (let ((doc (string-trim (string-join (mapcar #'car docs)
-                                       "\n\n"))))
+  (let ((doc (string-trim (string-join
+                           (mapcar #'eldoc-box--compose-doc docs)
+                           "\n\n"))))
     (when (eldoc-box--eldoc-message-function "%s" doc)
       (eldoc-display-in-echo-area docs interactive))))
 
@@ -694,6 +711,17 @@ height."
                          (pcase (match-string 0)
                            ("&lt;" "<")
                            ("&gt;" ">"))))))
+
+;;;; Tab-bar compatibility
+
+(defun eldoc-box-reset-frame ()
+  "Discard the current childframe and regenerate one.
+This allows any change in childframe parameter to take effect."
+  (interactive)
+  (setq eldoc-box--frame nil))
+
+(with-eval-after-load 'tab-bar-mode
+  (add-hook 'tab-bar-mode-hook #'eldoc-box-reset-frame))
 
 (provide 'eldoc-box)
 
