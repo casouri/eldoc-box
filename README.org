@@ -22,7 +22,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 ** Function
 - =eldoc-box-hover-mode= :: Enables a minor mode that displays documentation of the symbol at point in a childframe on upper corner.
 - =eldoc-box-hover-at-point-mode= :: Same as =eldoc-box-hover-mode= except the childframe is displayed at point, instead of on the upper corner. /Note that this mode brings a small but noticeable slow-down./
-- =eldoc-box-help-at-point= :: Display the documentation of the symbol at point in a temporary childframe, moving point or typing =C-g= disposes the childframe. This requires Emacs 28. (=eldoc-box-hover-mode= doesn’t need to be on for this command to work.)
+- =eldoc-box-help-at-point= :: Display the documentation of the symbol at point in a temporary childframe, moving point or typing =C-g= disposes the childframe. This command simply displays what would be displayed by =eldoc-doc-buffer= in a childframe, so it requires Emacs 28, and  =eldoc-box-hover-mode= doesn’t need to be on for this command to work.
 
 ** Face
 - =eldoc-box-border= :: Adjust =:background= of this face for border color.
