@@ -672,8 +672,10 @@ height."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward
-            (rx (>= 2 (or "\n" (seq "```" (+ (syntax word))) "<br>"
-                          (seq bol (+ (or " " "\t" " ")) eol))))
+            (rx (>= 2 (or "\n"
+                          (seq bol "```" (* (syntax word)) "\n")
+                          (seq bol "<br>" "\n")
+                          (seq bol (+ (or " " "\t" " ")) "\n"))))
             nil t)
       (if (or (eq (match-beginning 0) (point-min))
               (eq (match-end 0) (point-max)))
