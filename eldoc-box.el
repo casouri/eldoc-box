@@ -723,12 +723,13 @@ height."
                          'invisible t))
     ;; Special entities.
     (goto-char (point-min))
-    (while (re-search-forward (rx (or "&lt;" "&gt;")) nil t)
+    (while (re-search-forward (rx (or "&lt;" "&gt;" "&nbsp;")) nil t)
       (put-text-property (match-beginning 0) (match-end 0)
                          'display
                          (pcase (match-string 0)
                            ("&lt;" "<")
-                           ("&gt;" ">"))))))
+                           ("&gt;" ">")
+                           ("&nbsp;" " "))))))
 
 ;;;; Tab-bar compatibility
 
