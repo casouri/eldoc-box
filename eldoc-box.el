@@ -679,7 +679,7 @@ height."
     (while (re-search-forward
             (rx (>= 2 (or "\n"
                           (seq bol "```" (* (syntax word)) "\n")
-                          (seq bol "<br>" "\n")
+                          (seq (+ "<br>") "\n")
                           (seq bol (+ (or " " "\t" " ")) "\n"))))
             nil t)
       (if (or (eq (match-beginning 0) (point-min))
