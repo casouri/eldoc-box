@@ -666,7 +666,8 @@ childframe."
 
 (defun eldoc-box--replace-en-space ()
   "Display the en spaces in documentation as regular spaces."
-  (face-remap-set-base 'nobreak-space '(:inherit default)))
+  (face-remap-set-base 'nobreak-space '(:inherit default))
+  (face-remap-set-base 'markdown-line-break-face '(:inherit default)))
 
 (defun eldoc-box--condense-large-newline-gaps ()
   "Condense exceedingly large gaps made of consecutive newlines.
