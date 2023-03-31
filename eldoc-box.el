@@ -177,6 +177,7 @@ It will be passes with two arguments: WIDTH and HEIGHT of the childframe.")
 (defvar eldoc-box-buffer-hook '(eldoc-box--prettify-markdown-separator
                                 eldoc-box--replace-en-space
                                 eldoc-box--remove-linked-images
+                                eldoc-box--remove-noise-chars
                                 eldoc-box--fontify-html
                                 eldoc-box--condense-large-newline-gaps)
   "Hook run after buffer for doc is setup.
@@ -703,6 +704,13 @@ height."
             (rx "[" (seq "![" (+? anychar) "](" (+? anychar) ")") "]"
                 "(" (+? anychar) ")")
             nil t)
+      (replace-match ""))))
+
+(defun eldoc-box--remove-noise-chars ()
+  "Remove some noise characters like carriage return."
+  (save-excursion
+    (goto-char (point-min))
+    (while (search-forward "\r" nil t)
       (replace-match ""))))
 
 (defun eldoc-box--fontify-html ()
