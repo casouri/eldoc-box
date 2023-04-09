@@ -81,7 +81,7 @@
                             (((background light)) . (:background "black")))
   "The border color used in childframe.")
 
-(defface eldoc-box-body '((t . (:background unspecified)))
+(defface eldoc-box-body '((t . nil))
   "Body face used in documentation childframe.")
 
 (defcustom eldoc-box-only-multi-line nil
