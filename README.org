@@ -38,6 +38,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 - =eldoc-box-cleanup-interval= :: After this amount of seconds, eldoc-box will attempt to cleanup the childframe. E.g. if it is set to 1, the childframe is cleared 1 second after you moved the point to somewhere else (that doesn't have a doc to show). This doesn't apply to =eldoc-box-hover-at-point-mode=. In that mode, the childframe is cleared as soon as point moves.
 - =eldoc-box-fringe-use-same-bg= :: Whether to set fringe’s background color to as same as that of default. Default to t.
 - =eldoc-box-self-insert-command-list= :: By default =eldoc-box-hover-at-point-mode= only keeps childframe display while you are typing (ie, when =this-command= is =self-insert-command=). But if you bind something else to your keys, eldoc-box can’t recognize it and will hide childframe when you type. Add your command to this list so eldoc-box won’t hide childframe when this command is called.
+- =eldoc-box-lighter= :: Lighter displayed on the mode-line.
 
 ** Use with eglot
 
