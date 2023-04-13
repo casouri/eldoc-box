@@ -84,6 +84,12 @@
 (defface eldoc-box-body '((t . nil))
   "Body face used in documentation childframe.")
 
+(defcustom eldoc-box-lighter " ELDOC-BOX"
+  "Mod-line lighter for all eldoc-box modes.
+If the value is nil, no lighter is displayed."
+  :type '(choice string
+                 (const :tag "None" nil)))
+
 (defcustom eldoc-box-only-multi-line nil
   "If non-nil, only use childframe when there are more than one line."
   :type 'boolean)
@@ -576,7 +582,7 @@ display the docs in echo area depending on
 (define-minor-mode eldoc-box-hover-mode
   "Displays hover documentations in a childframe.
 The default position of childframe is upper corner."
-  :lighter " ELDOC-BOX"
+  :lighter eldoc-box-lighter
   (if eldoc-box-hover-mode
       (progn (when eldoc-box-hover-at-point-mode
                (eldoc-box-hover-at-point-mode -1))
@@ -587,7 +593,7 @@ The default position of childframe is upper corner."
 (define-minor-mode eldoc-box-hover-at-point-mode
   "A convenient minor mode to display doc at point.
 You can use \[keyboard-quit] to hide the doc."
-  :lighter " ELDOC-BOX"
+  :lighter eldoc-box-lighter
   (if eldoc-box-hover-at-point-mode
       (progn (when eldoc-box-hover-mode
                (eldoc-box-hover-mode -1))
