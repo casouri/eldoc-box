@@ -85,7 +85,7 @@
   "Body face used in documentation childframe.")
 
 (defcustom eldoc-box-lighter " ELDOC-BOX"
-  "Mod-line lighter for all eldoc-box modes.
+  "Mode line lighter for all eldoc-box modes.
 If the value is nil, no lighter is displayed."
   :type '(choice string
                  (const :tag "None" nil)))
