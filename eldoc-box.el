@@ -304,7 +304,6 @@ STR has to be a proper documentation, not empty string, not nil, etc."
       (run-hook-with-args 'eldoc-box-buffer-hook))
     (eldoc-box--get-frame doc-buffer)))
 
-
 (defun eldoc-box--window-side ()
   "Return the side of the selected window.
 Symbol ‘left’ if the selected window is on the left, ‘right’ if
@@ -373,6 +372,7 @@ base on WIDTH and HEIGHT of childframe text window."
          (y (cdr pos)))
     (cons (or (eldoc-box--at-point-x-by-company) x)
           y)))
+
 (defun eldoc-box--update-childframe-geometry (frame window)
   "Update the size and the position of childframe.
 FRAME is the childframe, WINDOW is the primary window."
@@ -408,8 +408,8 @@ FRAME is the childframe, WINDOW is the primary window."
     (setq eldoc-box--inhibit-childframe t)
     (eldoc-box-quit-frame)
     (run-with-idle-timer sec nil
-                    (lambda ()
-                      (setq eldoc-box--inhibit-childframe nil)))))
+                         (lambda ()
+                           (setq eldoc-box--inhibit-childframe nil)))))
 
 (defun eldoc-box--follow-cursor ()
   "Make childframe follow cursor in at-point mode."
@@ -592,7 +592,7 @@ display the docs in echo area depending on
 
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-mode
-  "Displays hover documentations in a childframe.
+  "Display hover documentations in a childframe.
 The default position of childframe is upper corner."
   :lighter eldoc-box-lighter
   (if eldoc-box-hover-mode
@@ -604,7 +604,7 @@ The default position of childframe is upper corner."
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-at-point-mode
   "A convenient minor mode to display doc at point.
-You can use \[keyboard-quit] to hide the doc."
+You can use \\[keyboard-quit] to hide the doc."
   :lighter eldoc-box-lighter
   (if eldoc-box-hover-at-point-mode
       (progn (when eldoc-box-hover-mode
@@ -633,7 +633,7 @@ instead."
   (interactive)
   (eldoc-box-help-at-point))
 
-;;;; Comany compatibility
+;;;; Company compatibility
 ;;
 
 ;; see also `eldoc-box--default-at-point-position-function'
