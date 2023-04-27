@@ -376,6 +376,17 @@ base on WIDTH and HEIGHT of childframe text window."
 (defun eldoc-box--update-childframe-geometry (frame window)
   "Update the size and the position of childframe.
 FRAME is the childframe, WINDOW is the primary window."
+  ;; WORKAROUND: See issue#68. If there’s some text with a display
+  ;; property of (space :width text) -- which is what we apply onto
+  ;; markdown separators -- ‘window-text-pixel-size’ wouldn’t return
+  ;; the correct value. Instead, it returns the current window width.
+  ;; So now the childram only grows in size and never shrinks. For
+  ;; whatever reason, if we set the frame size very small before
+  ;; calculating window’s text size, it can return the right value.
+  ;; (My guess is that the function takes (space :width text) at face
+  ;; value, but that can’t be the whole picture because it works fine
+  ;; when I manually evaluate the function in the childframe...)
+  (set-frame-size frame 1 1 t)
   (let* ((size
           (window-text-pixel-size
            window nil nil
