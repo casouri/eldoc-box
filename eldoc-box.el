@@ -769,8 +769,11 @@ This allows any change in childframe parameter to take effect."
   (interactive)
   (setq eldoc-box--frame nil))
 
-(with-eval-after-load 'tab-bar-mode
+(with-eval-after-load 'tab-bar
   (add-hook 'tab-bar-mode-hook #'eldoc-box-reset-frame))
+
+(with-eval-after-load 'tab-line
+  (add-hook 'tab-line-mode-hook #'eldoc-box-reset-frame))
 
 (provide 'eldoc-box)
 
