@@ -437,7 +437,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
       ;; (set-frame-parameter frame 'left-fringe (alist-get 'left-fringe eldoc-box-frame-parameters))
       ;; (set-frame-parameter frame 'right-fringe (alist-get 'right-fringe eldoc-box-frame-parameters))
 
-      (set-face-attribute 'fringe frame :background nil :inherit 'eldoc-box-body)
+      (set-face-attribute 'fringe frame :background 'unspecified :inherit 'eldoc-box-body)
       (set-window-dedicated-p window t)
       (redirect-frame-focus frame (frame-parent frame))
       (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
