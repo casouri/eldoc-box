@@ -212,6 +212,10 @@ See `eldoc-box-inhibit-display-when-moving'."
   (when (and eldoc-box--frame (frame-live-p eldoc-box--frame))
     (make-frame-invisible eldoc-box--frame t)))
 
+(defvar-local eldoc-box--old-eldoc-functions nil
+  "The original value of ‘eldoc-display-functions’.
+The original value before enabling eldoc-box.")
+
 (defun eldoc-box--enable ()
   "Enable eldoc-box hover.
 Intended for internal use."
@@ -219,6 +223,8 @@ Intended for internal use."
       (add-function :before-while (local 'eldoc-message-function)
                     #'eldoc-box--eldoc-message-function)
 
+    (setq-local eldoc-box--old-eldoc-functions
+                eldoc-display-functions)
     (setq-local eldoc-display-functions
                 (cons 'eldoc-box--eldoc-display-function
                       (remq 'eldoc-display-in-echo-area
@@ -234,12 +240,18 @@ Intended for internal use."
       (remove-function (local 'eldoc-message-function) #'eldoc-box--eldoc-message-function)
 
     (setq-local eldoc-display-functions
-                (cons 'eldoc-display-in-echo-area
-                      (remq 'eldoc-box--eldoc-display-function
-                            eldoc-display-functions))))
+                (remq 'eldoc-box--eldoc-display-function
+                      eldoc-display-functions))
+    ;; If we removed eldoc-display-in-echo-area when enabling
+    ;; eldoc-box, add it back.
+    (when (memq 'eldoc-display-in-echo-area
+                eldoc-box--old-eldoc-functions)
+      (setq-local eldoc-display-functions
+                  (cons 'eldoc-display-in-echo-area
+                        eldoc-display-functions))))
 
   (advice-remove #'keyboard-quit #'eldoc-box-quit-frame)
-  ;; If minor mode is turned off when childframe is visible, hide it.
+  ;; If minor mode is turned off when the childframe is visible, hide it.
   (when eldoc-box--frame
     (delete-frame eldoc-box--frame)
     (setq eldoc-box--frame nil)))
@@ -247,17 +259,16 @@ Intended for internal use."
 ;;;;; Help at point
 
 (defvar eldoc-box--help-at-point-last-point 0
-  "This point cache is used by clean up function.
-If (point) != last point, cleanup frame.")
+  "This point cache is used by the clean up function.
+If point != last point, hide the childframe.")
 
 (defun eldoc-box--help-at-point-cleanup ()
-  "Try to clean up the childframe made by eldoc-box hack."
+  "Try to clean up the childframe."
   (if (or (eq (point) eldoc-box--help-at-point-last-point)
-          ;; don't clean up when the user clicks childframe
+          ;; Don't clean up when the user clicks into the childframe.
           (eq (selected-frame) eldoc-box--frame))
       (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)
-    (eldoc-box-quit-frame)
-    (kill-local-variable 'eldoc-display-functions)))
+    (eldoc-box-quit-frame)))
 
 ;;;###autoload
 (defun eldoc-box-help-at-point ()
