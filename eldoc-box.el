@@ -292,6 +292,7 @@ If point != last point, hide the childframe.")
 
 ;; Please compiler.
 (defvar eldoc-box-hover-mode)
+
 (defun eldoc-box--display (str)
   "Display STR in childframe.
 STR has to be a proper documentation, not empty string, not nil, etc."
@@ -315,19 +316,24 @@ STR has to be a proper documentation, not empty string, not nil, etc."
       (run-hook-with-args 'eldoc-box-buffer-hook))
     (eldoc-box--get-frame doc-buffer)))
 
-
 (defun eldoc-box--window-side ()
   "Return the side of the selected window.
 Symbol ‘left’ if the selected window is on the left, ‘right’ if
 on the right. Return ‘left’ if there is only one window."
-  ;; Get the window at point (x, y), where x = 0, y = the y coordinate
-  ;; of point. If this window is the selected window, the selected
-  ;; window is on the left, otherwise the selected window is on the
-  ;; right.
-  (let* ((y (cdr (posn-x-y (posn-at-point))))
-         (top (nth 1 (window-absolute-pixel-edges (selected-window))))
-         (left-window (window-at-x-y 0 (+ y top))))
-    (if (eq left-window (selected-window))
+  ;; Calculate the left and right distances to the frame edge of the
+  ;; active window.  If the left distance is less than or equal to the
+  ;; right distance, it indicates that the active window is on the left.
+  ;; Otherwise, it is on the right.
+  (let* ((window-left (nth 0 (window-absolute-pixel-edges)))
+         (window-right (nth 2 (window-absolute-pixel-edges)))
+         (frame-left (nth 0 (frame-edges)))
+         (frame-right (nth 2 (frame-edges)))
+         (distance-left (- window-left frame-left))
+         (distance-right (- frame-right window-right)))
+    ;; When `distance-left' equals `distance-right', it means there is
+    ;; only one window in current frame, or the current active window
+    ;; occupies the entire frame horizontally, return left.
+    (if (<= distance-left distance-right)
         'left
       'right)))
 
@@ -388,6 +394,7 @@ base on WIDTH and HEIGHT of childframe text window."
          (y (cdr pos)))
     (cons (or (eldoc-box--at-point-x-by-company) x)
           y)))
+
 (defun eldoc-box--update-childframe-geometry (frame window)
   "Update the size and the position of childframe.
 FRAME is the childframe, WINDOW is the primary window."
@@ -423,8 +430,8 @@ FRAME is the childframe, WINDOW is the primary window."
     (setq eldoc-box--inhibit-childframe t)
     (eldoc-box-quit-frame)
     (run-with-idle-timer sec nil
-                    (lambda ()
-                      (setq eldoc-box--inhibit-childframe nil)))))
+                         (lambda ()
+                           (setq eldoc-box--inhibit-childframe nil)))))
 
 (defun eldoc-box--follow-cursor ()
   "Make childframe follow cursor in at-point mode."
@@ -471,13 +478,11 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
         (set-face-background 'child-frame-border
                              (face-attribute 'eldoc-box-border :background)
                              frame))
-      ;; set size
       (eldoc-box--update-childframe-geometry frame window)
       (setq eldoc-box--frame frame)
       (with-selected-frame frame
         (run-hook-with-args 'eldoc-box-frame-hook main-frame))
       (make-frame-visible frame))))
-
 
 ;;;;; ElDoc
 
@@ -607,7 +612,7 @@ display the docs in echo area depending on
 
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-mode
-  "Displays hover documentations in a childframe.
+  "Display hover documentations in a childframe.
 The default position of childframe is upper corner."
   :lighter eldoc-box-lighter
   (if eldoc-box-hover-mode
@@ -619,7 +624,7 @@ The default position of childframe is upper corner."
 ;;;###autoload
 (define-minor-mode eldoc-box-hover-at-point-mode
   "A convenient minor mode to display doc at point.
-You can use \[keyboard-quit] to hide the doc."
+You can use \\[keyboard-quit] to hide the doc."
   :lighter eldoc-box-lighter
   (if eldoc-box-hover-at-point-mode
       (progn (when eldoc-box-hover-mode
@@ -648,7 +653,7 @@ instead."
   (interactive)
   (eldoc-box-help-at-point))
 
-;;;; Comany compatibility
+;;;; Company compatibility
 ;;
 
 ;; see also `eldoc-box--default-at-point-position-function'
