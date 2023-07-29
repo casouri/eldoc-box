@@ -476,7 +476,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
       (set-face-attribute 'internal-border frame :inherit 'eldoc-box-border)
       (when (facep 'child-frame-border)
         (set-face-background 'child-frame-border
-                             (face-attribute 'eldoc-box-border :background)
+                             (face-attribute 'eldoc-box-border :background nil t)
                              frame))
       (eldoc-box--update-childframe-geometry frame window)
       (setq eldoc-box--frame frame)
