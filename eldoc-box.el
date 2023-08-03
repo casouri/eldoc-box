@@ -669,15 +669,23 @@ instead."
 
 ;; please compiler
 (defvar company-pseudo-tooltip-overlay)
+(declare-function company-box--get-frame "company-box")
 
 (defun eldoc-box--at-point-x-by-company ()
   "Return the x position that accommodates company's popup."
-  (if (and (featurep 'company) company-pseudo-tooltip-overlay)
-      (+ (* (frame-char-width)
-            (+ (overlay-get company-pseudo-tooltip-overlay 'company-width)
-               (overlay-get company-pseudo-tooltip-overlay 'company-column)))
-         (or (line-number-display-width t) 0))
-    nil))
+  (cond
+   ((and (boundp 'company-pseudo-tooltip-overlay)
+         company-pseudo-tooltip-overlay)
+    (+ (* (frame-char-width)
+          (+ (overlay-get company-pseudo-tooltip-overlay
+                          'company-width)
+             (overlay-get company-pseudo-tooltip-overlay
+                          'company-column)))
+       (or (line-number-display-width t) 0)))
+   ((and (boundp 'company-box--x) (numberp company-box--x))
+	(+ company-box--x
+       (frame-pixel-width (company-box--get-frame))))
+   (t nil)))
 
 ;;;; Markdown compatibility
 
