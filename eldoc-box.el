@@ -431,7 +431,10 @@ FRAME is the childframe, WINDOW is the primary window."
          (pos (funcall eldoc-box-position-function width height)))
     (set-frame-size frame width height t)
     ;; move position
-    (set-frame-position frame (car pos) (cdr pos))))
+    (set-frame-position frame (car pos) (cdr pos))
+    ;; Maybe forcing redisplay can make sure the new frame size is
+    ;; applied (issue#68).
+    (redisplay t))
 
 (defun eldoc-box--inhibit-childframe-for (sec)
   "Inhibit display of childframe for SEC seconds after Emacs is idle again."
