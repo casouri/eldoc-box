@@ -411,14 +411,15 @@ FRAME is the childframe, WINDOW is the primary window."
   ;; property of (space :width text) -- which is what we apply onto
   ;; markdown separators -- ‘window-text-pixel-size’ wouldn’t return
   ;; the correct value. Instead, it returns the current window width.
-  ;; So now the childram only grows in size and never shrinks. For
-  ;; whatever reason, if we set the frame size very small before
-  ;; calculating window’s text size, it can return the right value.
-  ;; (My guess is that the function takes (space :width text) at face
+  ;; So now the childram only grows in size and never shrinks. (My
+  ;; guess is that the function takes (space :width text) at face
   ;; value, but that can’t be the whole picture because it works fine
   ;; when I manually evaluate the function in the childframe...)
-  (set-frame-size frame 1 1 t)
-  (let* ((size
+  ;; Setting the frame size to something small causes redisplay issues
+  ;; under some setups such as pgtk with Wayland. So instead we just
+  ;; temporarily shrink the separators.
+  (let* ((separators (eldoc-box--remove-display-width-text window))
+         (size
           (window-text-pixel-size
            window nil nil
            (if (functionp eldoc-box-max-pixel-width) (funcall eldoc-box-max-pixel-width) eldoc-box-max-pixel-width)
@@ -431,7 +432,28 @@ FRAME is the childframe, WINDOW is the primary window."
          (pos (funcall eldoc-box-position-function width height)))
     (set-frame-size frame width height t)
     ;; move position
-    (set-frame-position frame (car pos) (cdr pos))))
+    (set-frame-position frame (car pos) (cdr pos))
+    (eldoc-box--restore-display-width-text window separators)))
+
+(defun eldoc-box--remove-display-width-text (window)
+  "Remove `(display (space :width text))' properties in WINDOW.
+Returns the list of `prop-match' objects found so they can be restored."
+  (with-selected-window window
+    (save-excursion
+      (goto-char (point-min))
+      (let ((matches nil))
+        (while-let ((prop (text-property-search-forward 'display '(space :width text) t)))
+          (push prop matches)
+          (remove-text-properties (prop-match-beginning prop) (prop-match-end prop) '(display)))
+        matches))))
+
+(defun eldoc-box--restore-display-width-text (window matches)
+  "Undoes the effects of `eldoc-box--remove-display-width-text' in WINDOW."
+  (with-selected-window window
+    (mapcar (lambda (match) (add-text-properties (prop-match-beginning match)
+                                                 (prop-match-end match)
+                                                 `(display ,(prop-match-value match))))
+            matches)))
 
 (defun eldoc-box--inhibit-childframe-for (sec)
   "Inhibit display of childframe for SEC seconds after Emacs is idle again."
