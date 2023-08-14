@@ -1,6 +1,6 @@
 #+TITLE: ElDoc box
 
-This package displays ElDoc documentations in a childframe. The childfrme is selectable and scrollable with mouse, even thought the cursor is hidden.
+This package displays ElDoc documentations in a childframe. The childframe is selectable and scrollable with mouse, even though the cursor is hidden.
 
 [[https://melpa.org/#/eldoc-box][file:https://melpa.org/packages/eldoc-box-badge.svg]]
 [[https://stable.melpa.org/#/eldoc-box][file:https://stable.melpa.org/packages/eldoc-box-badge.svg]]
