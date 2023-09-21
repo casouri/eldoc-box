@@ -290,7 +290,9 @@ If point != last point, hide the childframe.")
        (with-current-buffer eldoc--doc-buffer
          (buffer-string))))
     (setq eldoc-box--help-at-point-last-point (point))
-    (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)))
+    (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)
+    (when eldoc-box-clear-with-C-g
+      (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame))))
 
 ;;;; Backstage
 ;;;;; Variable
