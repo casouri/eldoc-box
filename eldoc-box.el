@@ -146,7 +146,8 @@ This separator is used for the documentation shown in
     (drag-internal-border . t)
     (no-special-glyphs . t)
     (desktop-dont-save . t)
-    (tab-bar-lines . 0))
+    (tab-bar-lines . 0)
+    (tab-bar-lines-keep-state . 1))
   "Frame parameters used to create the frame.")
 
 (defcustom eldoc-box-max-pixel-width 800
