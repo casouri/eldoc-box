@@ -371,7 +371,7 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
 The coordinate is relative to the native frame.
 
 WINDOW nil means use selected window."
-  (let* ((pos (pos-visible-in-window-p point window t))
+  (when-let* ((pos (pos-visible-in-window-p point window t))
          (x (car pos))
          (en (frame-char-width))
          (y (cadr pos))
@@ -382,7 +382,7 @@ WINDOW nil means use selected window."
 
 (defun eldoc-box--default-at-point-position-function-1 (width height)
   "See `eldoc-box--default-at-point-position-function' for WIDTH & HEIGHT docs."
-  (let* ((point-pos (eldoc-box--point-position-relative-to-native-frame))
+  (when-let* ((point-pos (eldoc-box--point-position-relative-to-native-frame))
          ;; calculate point coordinate relative to native frame
          ;; because childframe coordinate is relative to native frame
          (x (car point-pos))
@@ -405,7 +405,7 @@ WINDOW nil means use selected window."
   "Set `eldoc-box-position-function' to this function.
 To have childframe appear under point.  Position is calculated
 base on WIDTH and HEIGHT of childframe text window."
-  (let* ((pos (eldoc-box--default-at-point-position-function-1 width height))
+  (when-let* ((pos (eldoc-box--default-at-point-position-function-1 width height))
          (x (car pos))
          (y (cdr pos)))
     (cons (or (eldoc-box--at-point-x-by-company) x)
@@ -432,7 +432,7 @@ FRAME is the childframe, WINDOW is the primary window."
   ;; before calling ‘window-text-pixel-size’, and set them back after.
   (setcdr eldoc-box--markdown-separator-display-props nil)
 
-  (let* ((size
+  (when-let* ((size
           (window-text-pixel-size
            window nil nil
            (if (functionp eldoc-box-max-pixel-width) (funcall eldoc-box-max-pixel-width) eldoc-box-max-pixel-width)
