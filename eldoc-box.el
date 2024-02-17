@@ -371,6 +371,9 @@ Position is calculated base on WIDTH and HEIGHT of childframe text window"
 The coordinate is relative to the native frame.
 
 WINDOW nil means use selected window."
+  (unless point
+    ;; Handle edge case. See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=69259.
+    (setq point (window-point window)))
   (let* ((pos (pos-visible-in-window-p point window t))
          (x (car pos))
          (en (frame-char-width))
