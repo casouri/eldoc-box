@@ -794,6 +794,17 @@ height."
                          'invisible t)
       (put-text-property (match-beginning 3) (match-end 3)
                          'invisible t))
+    ;; Don't show these tags.
+    (goto-char (point-min))
+    (while (re-search-forward
+            (rx (group "<p>")
+                (group (*? anychar))
+                (group "</p>"))
+            nil t)
+      (put-text-property (match-beginning 1) (match-end 1)
+                         'invisible t)
+      (put-text-property (match-beginning 3) (match-end 3)
+                         'invisible t))
     ;; Special entities.
     (goto-char (point-min))
     (while (re-search-forward (rx (or "&lt;" "&gt;" "&nbsp;")) nil t)
