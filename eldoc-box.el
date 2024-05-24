@@ -824,7 +824,9 @@ height."
   "Discard the current childframe and regenerate one.
 This allows any change in childframe parameter to take effect."
   (interactive)
-  (setq eldoc-box--frame nil))
+  (when eldoc-box--frame
+    (delete-frame eldoc-box--frame)
+    (setq eldoc-box--frame nil)))
 
 (with-eval-after-load 'tab-bar
   (add-hook 'tab-bar-mode-hook #'eldoc-box-reset-frame))
