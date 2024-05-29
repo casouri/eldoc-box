@@ -284,11 +284,32 @@ If point != last point, hide the childframe.")
       (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)
     (eldoc-box-quit-frame)))
 
+(defun eldoc-box--help-at-point-async-update (docs _interactive)
+  "Update async doc changes to help-at-point childframe.
+
+This is added to ‘eldoc-display-functions’, such that when async doc
+comes in, the at-point doc pop-up can be updated.
+
+For DOCS, see ‘eldoc-display-functions’."
+  (when (and (frame-visible-p eldoc-box--frame)
+             (eq eldoc-box--help-at-point-last-point (point)))
+    (let ((eldoc-box-position-function
+           eldoc-box-at-point-position-function))
+      (eldoc-box--display
+       (concat (mapcar #'car docs)
+               (concat "\n"
+                       (or eldoc-doc-buffer-separator "---")
+                       "\n"))))))
+
 ;;;###autoload
 (defun eldoc-box-help-at-point ()
   "Display documentation of the symbol at point."
   (interactive)
   (when (boundp 'eldoc--doc-buffer)
+    (unless (memq #'eldoc-box--help-at-point-async-update
+                  eldoc-display-functions)
+      (add-hook 'eldoc-display-functions
+                #'eldoc-box--help-at-point-async-update 0 t))
     (let ((eldoc-box-position-function
            eldoc-box-at-point-position-function))
       (eldoc-box--display
