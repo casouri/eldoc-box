@@ -27,6 +27,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 ** Face
 - =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Default face used by childframe.  I suggest to use a nice sans serif font.
+- =eldoc-box-markdown-separator=: Face for the separator line (=<br>=) in Markdown documentation.
 
 ** Hooks
 - =eldoc-box-buffer-hook= :: A hook that runs after buffer for doc is setup. Run inside the new buffer every time before the new documentation is displayed.
