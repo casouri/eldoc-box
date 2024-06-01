@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2018 Yuan Fu
 
-;; Version: 1.11.1
+;; Version: 1.12.1
 
 ;; Author: Yuan Fu <casouri@gmail.com>
 ;; URL: https://github.com/casouri/eldoc-box
