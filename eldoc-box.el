@@ -306,15 +306,15 @@ For DOCS, see ‘eldoc-display-functions’."
   "Display documentation of the symbol at point."
   (interactive)
   (when (boundp 'eldoc--doc-buffer)
-    (unless (memq #'eldoc-box--help-at-point-async-update
-                  eldoc-display-functions)
-      (add-hook 'eldoc-display-functions
-                #'eldoc-box--help-at-point-async-update 0 t))
+    (add-hook 'eldoc-display-functions
+              #'eldoc-box--help-at-point-async-update 0 t)
     (let ((eldoc-box-position-function
-           eldoc-box-at-point-position-function))
+           eldoc-box-at-point-position-function)
+          (doc (with-current-buffer eldoc--doc-buffer
+                 (buffer-string))))
       (eldoc-box--display
-       (with-current-buffer eldoc--doc-buffer
-         (buffer-string))))
+       (if (equal doc "")
+           "There’s no doc to display at this point" doc)))
     (setq eldoc-box--help-at-point-last-point (point))
     (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)
     (when eldoc-box-clear-with-C-g
