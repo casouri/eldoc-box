@@ -291,7 +291,8 @@ This is added to ‘eldoc-display-functions’, such that when async doc
 comes in, the at-point doc pop-up can be updated.
 
 For DOCS, see ‘eldoc-display-functions’."
-  (when (and (frame-visible-p eldoc-box--frame)
+  (when (and eldoc-box--frame
+             (frame-visible-p eldoc-box--frame)
              (eq eldoc-box--help-at-point-last-point (point)))
     (let ((eldoc-box-position-function
            eldoc-box-at-point-position-function))
