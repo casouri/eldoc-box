@@ -297,7 +297,7 @@ For DOCS, see ‘eldoc-display-functions’."
     (let ((eldoc-box-position-function
            eldoc-box-at-point-position-function))
       (eldoc-box--display
-       (concat (mapcar #'car docs)
+       (concat (mapconcat #'car docs)
                (concat "\n"
                        (or eldoc-doc-buffer-separator "---")
                        "\n"))))))
