@@ -348,6 +348,7 @@ STR has to be a proper documentation, not empty string, not nil, etc."
       ;; and `eldoc-box--maybe-cleanup' in `eldoc-box--cleanup-timer' will clear the childframe
       (buffer-face-set 'eldoc-box-body)
       (setq eldoc-box-hover-mode t)
+      (set-window-margins nil nil nil)
       (erase-buffer)
       (insert str)
       (goto-char (point-min))
