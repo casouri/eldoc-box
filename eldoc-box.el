@@ -292,6 +292,7 @@ comes in, the at-point doc pop-up can be updated.
 
 For DOCS, see ‘eldoc-display-functions’."
   (when (and eldoc-box--frame
+             (frame-live-p eldoc-box--frame)
              (frame-visible-p eldoc-box--frame)
              (eq eldoc-box--help-at-point-last-point (point)))
     (let ((eldoc-box-position-function
