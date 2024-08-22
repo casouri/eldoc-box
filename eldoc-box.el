@@ -349,7 +349,6 @@ STR has to be a proper documentation, not empty string, not nil, etc."
       ;; `eldoc-box--cleanup-timer' will clear the childframe
       (buffer-face-set 'eldoc-box-body)
       (setq eldoc-box-hover-mode t)
-      (set-window-margins nil nil nil)
       (erase-buffer)
       (insert str)
       (goto-char (point-min))
@@ -535,6 +534,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                              (face-attribute 'eldoc-box-border :background nil t)
                              frame))
       (eldoc-box--update-childframe-geometry frame window)
+      (set-window-margins window nil nil)
       (setq eldoc-box--frame frame)
       (with-selected-frame frame
         (run-hook-with-args 'eldoc-box-frame-hook main-frame))
