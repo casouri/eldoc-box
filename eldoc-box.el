@@ -194,6 +194,19 @@ childframe, and should return a (X . Y) cons cell.")
   "T means fringe's background color is set to as same as that of default."
   :type 'boolean)
 
+(defvar-local eldoc-box-buffer-init-function nil
+  "Function that runs before any eldoc-box buffer setup.
+
+This function is given the original buffer as the sole argument, and
+runs with the eldoc-box buffer as the current buffer.
+
+Everytime eldoc-box displays a documentation, it calls this function
+first, then does some setup, and calls ‘eldoc-box-buffer-hook’.
+
+This is a buffer-local variable, and eldoc-box takes the value of this
+variable in the origin buffer, and runs it in the doc buffer. This allows
+different major modes to run different init functions.")
+
 (defvar eldoc-box-buffer-hook '(eldoc-box--prettify-markdown-separator
                                 eldoc-box--replace-en-space
                                 eldoc-box--remove-linked-images
@@ -335,8 +348,11 @@ For DOCS, see ‘eldoc-display-functions’."
 (defun eldoc-box--display (str)
   "Display STR in childframe.
 STR has to be a proper documentation, not empty string, not nil, etc."
-  (let ((doc-buffer (get-buffer-create eldoc-box--buffer)))
+  (let ((doc-buffer (get-buffer-create eldoc-box--buffer))
+        (origin-buffer (current-buffer))
+        (init-function eldoc-box-buffer-init-function))
     (with-current-buffer doc-buffer
+      (funcall init-function origin-buffer)
       (setq mode-line-format nil)
       (setq header-line-format nil)
       ;; WORKAROUND: (issue#66) If cursor-type is ‘box’, sometimes the
