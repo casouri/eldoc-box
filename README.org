@@ -40,7 +40,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 - =eldoc-box-fringe-use-same-bg= :: Whether to set fringe’s background color to as same as that of default. Default to t.
 - =eldoc-box-self-insert-command-list= :: By default =eldoc-box-hover-at-point-mode= only keeps childframe display while you are typing (ie, when =this-command= is =self-insert-command=). But if you bind something else to your keys, eldoc-box can’t recognize it and will hide childframe when you type. Add your command to this list so eldoc-box won’t hide childframe when this command is called.
 - =eldoc-box-lighter= :: Lighter displayed on the mode line.
-- =eldoc-box-buffer-init-function= :: A function that runs in eldoc-box doc buffer before any setup runs. See docstring for more information.
+- =eldoc-box-buffer-setup-function= :: A function that runs in eldoc-box doc buffer for setup. See docstring for more information.
 
 ** Use with eglot
 
