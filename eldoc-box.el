@@ -283,6 +283,22 @@ Intended for internal use."
     (delete-frame eldoc-box--frame)
     (setq eldoc-box--frame nil)))
 
+;;;;; Commands
+
+(defun eldoc-box-scroll-up (arg)
+  "Scroll up ARG lines in the childframe."
+  (interactive "p")
+  (when eldoc-box--frame
+    (with-selected-frame eldoc-box--frame
+      (scroll-up arg))))
+
+(defun eldoc-box-scroll-down (arg)
+  "Scroll down ARG lines in the childframe."
+  (interactive "p")
+  (when eldoc-box--frame
+    (with-selected-frame eldoc-box--frame
+      (scroll-down arg))))
+
 ;;;;; Help at point
 
 (defvar eldoc-box--help-at-point-last-point 0
