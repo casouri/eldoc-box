@@ -66,9 +66,12 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl-lib)
-  (require 'pcase)
-  (require 'seq))
+  (require 'pcase))
+
+(require 'cl-lib)
+(require 'seq)
+;; For ‘eldoc-doc-buffer-separator’.
+(require 'eldoc)
 
 ;;;; Userland
 ;;;;; Variable
@@ -312,6 +315,9 @@ If point != last point, hide the childframe.")
           (eq (selected-frame) eldoc-box--frame))
       (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)
     (eldoc-box-quit-frame)))
+
+;; Older Emacs doesn’t have this variable defined.
+(defvar eldoc-doc-buffer-separator)
 
 (defun eldoc-box--help-at-point-async-update (docs _interactive)
   "Update async doc changes to help-at-point childframe.
