@@ -57,6 +57,20 @@ By default, eldoc-box tries to prettify the displayed markdown documentation as 
 
 [[./demo.png]]
 
+** Prettify Typescript error message
+
+To prettify Typescript error messages, set =eldoc-box-buffer-setup-function= buffer-locally.
+
+#+begin_src elisp
+(setq-local eldoc-box-buffer-setup-function
+            #'eldoc-box-prettify-ts-errors-setup)
+#+end_src
+
+This way, Eldoc-box will format and highlight the types and properties in error messages:
+
+[[./prettify-ts-error.png]]
+
+
 * Credit
 - Thanks to [[https://github.com/joaotavora][João Távora]] for valuable contribution and explaining eldoc and eglot internals to me.
 - This package is initially adapted from Sebastien Chapuis’s package lsp-ui.el.
