@@ -895,6 +895,98 @@ This allows any change in childframe parameter to take effect."
 (with-eval-after-load 'tab-line
   (add-hook 'tab-line-mode-hook #'eldoc-box-reset-frame))
 
+;;;; Prettify Typescript error message
+
+(defvar-local eldoc-box-prettify-ts-errors-ts-mode nil
+  "Typescript major mode used for fontifying Typescript types.
+
+Used by ‘eldoc-box--prettify-ts-errors’.")
+
+(defun eldoc-box-prettify-ts-errors-setup (orig-buffer)
+  "Init function for prettifying Typescript errors.
+
+Set ‘eldoc-box-buffer-setup-function’ to this function in Typescript
+buffer to get error message prettification.
+
+ORIG-BUFFER is the source Typescript buffer."
+  (setq eldoc-box-prettify-ts-errors-ts-mode
+        (buffer-local-value 'major-mode orig-buffer))
+  (message "%s" (buffer-local-value 'major-mode orig-buffer))
+  (add-hook 'eldoc-box-buffer-hook #'eldoc-box--prettify-ts-errors 0 t)
+  (eldoc-box-buffer-setup orig-buffer))
+
+(defun eldoc-box--prettify-ts-errors ()
+  "Quick-and-dirty prettification for Typescript errors.
+
+The ‘noErrorTruncation’ compiler option must be set to true, otherwise
+the compiler truncates the types and formatting wouldn’t work."
+  (goto-char (point-min))
+  (let ((workbuf (get-buffer-create " *eldoc-box--prettify-ts-errors*"))
+        (ts-mode eldoc-box-prettify-ts-errors-ts-mode)
+        type-text
+        fontified-type
+        multi-line)
+    (with-current-buffer workbuf
+      (funcall ts-mode))
+    ;; 1. Prettify types.
+    (while (re-search-forward
+            ;; Typescript uses doble quotes for literal unions like
+            ;; type A = "A" | "AA", so we don’t need to worry about
+            ;; single quotes in the type.
+            (rx (or "Type" "type") " "
+                (group "'" (group (+? anychar)) "'"))
+            nil t)
+      (save-match-data
+        (setq type-text (match-string 2))
+        (setq fontified-type
+              (with-current-buffer workbuf
+                (erase-buffer)
+                (insert "type A = ")
+                (insert type-text)
+
+                (goto-char (point-min))
+                (while (re-search-forward (rx (or "{" ";")) nil t)
+                  (insert "\n"))
+                (goto-char (point-min))
+                (while (search-forward "|" nil t)
+                  (when (equal "}" (char-before (max (point-min) (- (point) 2))))
+                    (replace-match "\n|")))
+                (indent-region (point-min) (point-max))
+
+                (font-lock-fontify-region (point-min) (point-max))
+                ;; Make sure the type are in monospace font.
+                (font-lock-append-text-property
+                 (point-min) (point-max)
+                 'face `(:family ,(face-attribute 'fixed-pitch :family)))
+
+                ;; Don’t include the "type A = " we inserted earlier.
+                (string-trim
+                 (buffer-substring (+ (point-min) 9) (point-max)))))
+        (setq multi-line (string-search "\n" fontified-type))
+        ;; Indent and add newline at the beginning and the end.
+        (when multi-line
+          (setq fontified-type
+                (concat "\n"
+                        (mapconcat (lambda (line)
+                                     (concat "  " line))
+                                   (string-split fontified-type "\n")
+                                   "\n")
+                        "\n"))))
+      (if (not multi-line)
+          (replace-match fontified-type nil nil nil 2)
+        (replace-match fontified-type nil nil nil 1)
+        ;; Remove the first whitespace on the next line after the
+        ;; multi-line type.
+        (delete-char 1)))
+    ;; 2. Prettify properties.
+    (goto-char (point-min))
+    (while (re-search-forward
+            (rx (or "Property" "property") " "
+                (group "'" (group (+? anychar)) "'"))
+            nil t)
+      (put-text-property (match-beginning 2) (match-end 2)
+                         'face 'font-lock-property-name-face))))
+
 (provide 'eldoc-box)
 
 ;;; eldoc-box.el ends here
