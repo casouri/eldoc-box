@@ -121,7 +121,9 @@ sources, this separator is used to separate documentation from
 different sources.
 
 This separator is used for the documentation shown in
-‘eldoc-box-bover-mode’ but not ‘eldoc-box-help-at-point’."
+‘eldoc-box-bover-mode’ but not ‘eldoc-box-help-at-point’.
+‘eldoc-box-help-at-point’ just shows Eldoc doc buffer, which uses
+‘eldoc-doc-buffer-separator’."
   :type 'string)
 
 (defvar eldoc-box-frame-parameters
