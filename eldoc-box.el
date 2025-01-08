@@ -318,9 +318,6 @@ If point != last point, hide the childframe.")
       (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)
     (eldoc-box-quit-frame)))
 
-;; Older Emacs doesn’t have this variable defined.
-(defvar eldoc-doc-buffer-separator)
-
 (defun eldoc-box--help-at-point-async-update (docs _interactive)
   "Update async doc changes to help-at-point childframe.
 
@@ -335,10 +332,11 @@ For DOCS, see ‘eldoc-display-functions’."
     (let ((eldoc-box-position-function
            eldoc-box-at-point-position-function))
       (eldoc-box--display
-       (string-join (mapcar #'car docs)
-                    (concat "\n"
-                            (or eldoc-doc-buffer-separator "---")
-                            "\n"))))))
+       (string-join
+        (mapcar #'car docs)
+        (concat "\n"
+                (or (bound-and-true-p 'eldoc-doc-buffer-separator) "---")
+                "\n"))))))
 
 ;;;###autoload
 (defun eldoc-box-help-at-point ()
