@@ -335,7 +335,7 @@ For DOCS, see ‘eldoc-display-functions’."
        (string-join
         (mapcar #'car docs)
         (concat "\n"
-                (or (bound-and-true-p 'eldoc-doc-buffer-separator) "---")
+                (or (bound-and-true-p eldoc-doc-buffer-separator) "---")
                 "\n"))))))
 
 ;;;###autoload
