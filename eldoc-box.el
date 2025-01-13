@@ -212,6 +212,12 @@ This is a buffer-local variable, and eldoc-box takes the value of this
 variable from the origin buffer, and runs it in the doc buffer. This
 allows different major modes to run different setup functions.")
 
+(defvar eldoc-box-buffer-setup-hook nil
+  "Hooks that runs in the doc buffer before ‘eldoc-box-buffer-hook’.
+
+Functions in this hook are also passed the original buffer as the sole
+argument.")
+
 (defvar eldoc-box-buffer-hook '(eldoc-box--prettify-markdown-separator
                                 eldoc-box--replace-en-space
                                 eldoc-box--remove-linked-images
@@ -367,7 +373,7 @@ For DOCS, see ‘eldoc-display-functions’."
 ;; Please compiler.
 (defvar eldoc-box-hover-mode)
 
-(defun eldoc-box-buffer-setup (_orig-buffer)
+(defun eldoc-box-buffer-setup (orig-buffer)
   "Setup the doc buffer."
   (setq mode-line-format nil)
   (setq header-line-format nil)
@@ -382,6 +388,7 @@ For DOCS, see ‘eldoc-display-functions’."
   (buffer-face-set 'eldoc-box-body)
   (setq eldoc-box-hover-mode t)
   (visual-line-mode)
+  (run-hook-with-args 'eldoc-box-buffer-setup-hook orig-buffer)
   (run-hook-with-args 'eldoc-box-buffer-hook))
 
 (defun eldoc-box--display (str)
@@ -903,37 +910,21 @@ This allows any change in childframe parameter to take effect."
 
 ;;;; Prettify Typescript error message
 
-(defvar-local eldoc-box-prettify-ts-errors-ts-mode nil
-  "Typescript major mode used for fontifying Typescript types.
-
-Used by ‘eldoc-box--prettify-ts-errors’.")
-
-(defun eldoc-box-prettify-ts-errors-setup (orig-buffer)
-  "Init function for prettifying Typescript errors.
-
-Set ‘eldoc-box-buffer-setup-function’ to this function in Typescript
-buffer to get error message prettification.
-
-ORIG-BUFFER is the source Typescript buffer."
-  (setq eldoc-box-prettify-ts-errors-ts-mode
-        (buffer-local-value 'major-mode orig-buffer))
-  (message "%s" (buffer-local-value 'major-mode orig-buffer))
-  (add-hook 'eldoc-box-buffer-hook #'eldoc-box--prettify-ts-errors 0 t)
-  (eldoc-box-buffer-setup orig-buffer))
-
-(defun eldoc-box--prettify-ts-errors ()
+(defun eldoc-box-prettify-ts-errors (orig-buffer)
   "Quick-and-dirty prettification for Typescript errors.
+
+ORIG-BUFFER is used to get the Typescript major mode for fontification
+and indentation.
 
 The ‘noErrorTruncation’ compiler option must be set to true, otherwise
 the compiler truncates the types and formatting wouldn’t work."
   (goto-char (point-min))
   (let ((workbuf (get-buffer-create " *eldoc-box--prettify-ts-errors*"))
-        (ts-mode eldoc-box-prettify-ts-errors-ts-mode)
         type-text
         fontified-type
         multi-line)
     (with-current-buffer workbuf
-      (funcall ts-mode))
+      (funcall (buffer-local-value orig-buffer 'major-mode)))
     ;; 1. Prettify types.
     (while (re-search-forward
             ;; Typescript uses doble quotes for literal unions like

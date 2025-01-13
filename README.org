@@ -33,6 +33,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 ** Hooks
 - =eldoc-box-buffer-hook= :: A hook that runs after buffer for doc is setup. Run inside the new buffer every time before the new documentation is displayed.
 - =eldoc-box-frame-hook= :: A hook that runs after doc frame is setup but just before it is made visible. Each function runs inside the child frame and receives the main frame as the sole argument.
+- =eldoc-box-buffer-setup-hook= :: A hook that runs before =eldoc-box-buffer-hook= in the doc buffer. Each function is passed the source code buffer as the sole argument.
 
 ** Variable
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: The max width/height of the childframe.
@@ -59,11 +60,10 @@ By default, eldoc-box tries to prettify the displayed markdown documentation as 
 
 ** Prettify Typescript error message
 
-To prettify Typescript error messages, set =eldoc-box-buffer-setup-function= buffer-locally.
+To prettify Typescript error messages, add =eldoc-box-prettify-ts-errors= to =eldoc-box-buffer-setup-hook= in Typescript modes.
 
 #+begin_src elisp
-(setq-local eldoc-box-buffer-setup-function
-            #'eldoc-box-prettify-ts-errors-setup)
+(add-hook 'eldoc-box-buffer-setup-hook #'eldoc-box-prettify-ts-errors 0 t)
 #+end_src
 
 This way, Eldoc-box will format and highlight the types and properties in error messages:
