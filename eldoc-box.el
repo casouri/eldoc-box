@@ -924,7 +924,7 @@ the compiler truncates the types and formatting wouldn’t work."
         fontified-type
         multi-line)
     (with-current-buffer workbuf
-      (funcall (buffer-local-value orig-buffer 'major-mode)))
+      (funcall (buffer-local-value 'major-mode orig-buffer)))
     ;; 1. Prettify types.
     (while (re-search-forward
             ;; Typescript uses doble quotes for literal unions like
