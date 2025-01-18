@@ -388,6 +388,10 @@ For DOCS, see ‘eldoc-display-functions’."
   (buffer-face-set 'eldoc-box-body)
   (setq eldoc-box-hover-mode t)
   (visual-line-mode)
+  ;; Use buffer-local binding in the original buffer
+  ;; for the setup hook to allow original mode-specific setup.
+  (setq-local eldoc-box-buffer-setup-hook
+              (buffer-local-value 'eldoc-box-buffer-setup-hook orig-buffer))
   (run-hook-with-args 'eldoc-box-buffer-setup-hook orig-buffer)
   (run-hook-with-args 'eldoc-box-buffer-hook))
 
