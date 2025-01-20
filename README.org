@@ -33,7 +33,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 ** Hooks
 - =eldoc-box-buffer-hook= :: A hook that runs after buffer for doc is setup. Run inside the new buffer every time before the new documentation is displayed.
 - =eldoc-box-frame-hook= :: A hook that runs after doc frame is setup but just before it is made visible. Each function runs inside the child frame and receives the main frame as the sole argument.
-- =eldoc-box-buffer-setup-hook= :: A hook that runs before =eldoc-box-buffer-hook= in the doc buffer. Each function is passed the source code buffer as the sole argument.
+- =eldoc-box-buffer-setup-hook= :: A hook that runs before =eldoc-box-buffer-hook= in the doc buffer. Each function is passed the source code buffer as the sole argument. Unlike =eldoc-box-buffer-hook=, eldoc-box takes the value of this hook from the original buffer (that contains source code), not the doc buffer. This allows more flexible customization for this hook based on major modes.
 
 ** Variable
 - =eldoc-box-max-pixel-width= & =eldoc-box-max-pixel-height= :: The max width/height of the childframe.
