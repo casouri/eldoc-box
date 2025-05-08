@@ -488,8 +488,9 @@ base on WIDTH and HEIGHT of childframe text window."
   (let* ((pos (eldoc-box--default-at-point-position-function-1 width height))
          (x (car pos))
          (y (cdr pos)))
-    (cons (or (eldoc-box--at-point-x-by-company) x)
-          y)))
+    (or (eldoc-box--at-point-x-y-by-corfu)
+        (cons (or (eldoc-box--at-point-x-by-company) x)
+              y))))
 
 (defvar eldoc-box--markdown-separator-display-props)
 
@@ -787,10 +788,22 @@ instead."
        (frame-pixel-width (company-box--get-frame))))
    (t nil)))
 
+;;;; Corfu compatibility
+
+(defun eldoc-box--at-point-x-y-by-corfu ()
+  "Return the x-y position that accommodates corfu's popup.
+
+Returns a cons (X . Y) of pixel positions relative to the native frame.
+Return nil if corfu frame isn’t visible."
+  (when (and corfu--frame (frame-live-p corfu--frame))
+    (cons (+ (car (frame-position corfu--frame))
+             (frame-pixel-width corfu--frame))
+          (cdr (frame-position corfu--frame)))))
+
 ;;;; Markdown compatibility
 
 (defvar-local eldoc-box--markdown-separator-display-props
-    '(space :width text)
+  '(space :width text)
   "Stores the display text property applied to markdown separators.
 
 Due to a bug, in ‘eldoc-box--update-childframe-geometry’, we
