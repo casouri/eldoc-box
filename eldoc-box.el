@@ -790,12 +790,15 @@ instead."
 
 ;;;; Corfu compatibility
 
+(defvar corfu--frame)
 (defun eldoc-box--at-point-x-y-by-corfu ()
   "Return the x-y position that accommodates corfu's popup.
 
 Returns a cons (X . Y) of pixel positions relative to the native frame.
 Return nil if corfu frame isn’t visible."
-  (when (and corfu--frame (frame-live-p corfu--frame))
+  (when (and corfu--frame
+             (frame-live-p corfu--frame)
+             (frame-visible-p corfu--frame))
     (cons (+ (car (frame-position corfu--frame))
              (frame-pixel-width corfu--frame))
           (cdr (frame-position corfu--frame)))))
