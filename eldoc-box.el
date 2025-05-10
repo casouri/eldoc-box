@@ -796,7 +796,8 @@ instead."
 
 Returns a cons (X . Y) of pixel positions relative to the native frame.
 Return nil if corfu frame isn’t visible."
-  (when (and corfu--frame
+  (when (and (boundp 'corfu--frame)
+             corfu--frame
              (frame-live-p corfu--frame)
              (frame-visible-p corfu--frame))
     (cons (+ (car (frame-position corfu--frame))
