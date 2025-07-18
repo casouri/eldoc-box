@@ -470,8 +470,8 @@ WINDOW nil means use selected window."
          (em (frame-char-height)))
     (cons (if (< (- (frame-inner-width) width) x)
               ;; space on the right of the pos is not enough
-              ;; put to left
-              (max 0 (- x width))
+              ;; make sure the right edge of the child frame still in the emacs window.
+              (max 0 (- (frame-inner-width) width))
             ;; normal, just return x
             x)
           (if (< (- (frame-inner-height) height) y)
