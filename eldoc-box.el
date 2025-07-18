@@ -477,9 +477,10 @@ WINDOW nil means use selected window."
          (y (cdr point-pos))
          (em (frame-char-height)))
     (cons (if (< (- (frame-inner-width) width) x)
-              ;; space on the right of the pos is not enough
-              ;; put to left
-              (max 0 (- x width))
+              ;; Space on the right of the pos is not enough. Make
+              ;; sure the right edge of the child frame still in the
+              ;; Emacs fram.
+              (max 0 (- (frame-inner-width) width))
             ;; normal, just return x
             x)
           (if eldoc-box-hover-display-frame-above-point
