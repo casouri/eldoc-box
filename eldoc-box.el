@@ -62,6 +62,7 @@
 ;; - ‘eldoc-box-cleanup-interval’
 ;; - ‘eldoc-box-fringe-use-same-bg’
 ;; - ‘eldoc-box-self-insert-command-list’
+;; - ‘eldoc-box-hover-display-frame-above-point’
 
 ;;; Code:
 
@@ -180,6 +181,12 @@ Its value should be a list: (left right top)"
           (integer :tag "Left")
           (integer :tag "Right")
           (integer :tag "Top")))
+
+(defcustom eldoc-box-hover-display-frame-above-point nil
+  "T means display the child frame above the cursor if there is enough space
+above the cursor, default to nil, means by default, the child frame will be displayed 
+under the cursor. This only for hover at point."
+  :type 'boolean)
 
 (defvar eldoc-box-position-function #'eldoc-box--default-upper-corner-position-function
   "Eldoc-box uses this function to set childframe's position.
@@ -474,12 +481,20 @@ WINDOW nil means use selected window."
               (max 0 (- x width))
             ;; normal, just return x
             x)
-          (if (< (- (frame-inner-height) height) y)
+          (if eldoc-box-hover-display-frame-above-point
+              (if (< y height)
+                  ;; space above the pos is not enough
+                  ;; put below
+                  (min (- (frame-inner-height) height) (+ y em))
+                ;; normal, just return y - height
+                (- y height))
+            (if (< (- (frame-inner-height) height) y)
               ;; space under the pos is not enough
               ;; put above
               (max 0 (- y height))
             ;; normal, just return y + em
-            (+ y em)))))
+            (+ y em)))
+	  )))
 
 (defun eldoc-box--default-at-point-position-function (width height)
   "Set `eldoc-box-position-function' to this function.
