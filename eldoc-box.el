@@ -183,9 +183,9 @@ Its value should be a list: (left right top)"
           (integer :tag "Top")))
 
 (defcustom eldoc-box-hover-display-frame-above-point nil
-  "T means display the child frame above the cursor if there is enough space
-above the cursor, default to nil, means by default, the child frame will be displayed 
-under the cursor. This only for hover at point."
+  "Whether to display childframe above point in at-point mode.
+If non-nil, in ‘eldoc-box-hover-at-point-mode’, the childframe is
+displayed above point rather than below it."
   :type 'boolean)
 
 (defvar eldoc-box-position-function #'eldoc-box--default-upper-corner-position-function
