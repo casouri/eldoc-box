@@ -89,6 +89,7 @@
   "Body face used in documentation childframe.")
 
 (defface eldoc-box-markdown-separator '((t . ( :strike-through t
+                                               :extend t
                                                :height 0.4)))
   "Face for the separator line in Markdown.")
 
@@ -507,8 +508,6 @@ base on WIDTH and HEIGHT of childframe text window."
         (cons (or (eldoc-box--at-point-x-by-company) x)
               y))))
 
-(defvar eldoc-box--markdown-separator-display-props)
-
 (defun eldoc-box--update-childframe-geometry (frame window)
   "Update the size and the position of childframe.
 FRAME is the childframe, WINDOW is the primary window."
@@ -526,7 +525,12 @@ FRAME is the childframe, WINDOW is the primary window."
   ;; small before calling ‘window-text-pixel-size’ works, but brings
   ;; other problems. Now we just set the display property to nil
   ;; before calling ‘window-text-pixel-size’, and set them back after.
-  (setcdr eldoc-box--markdown-separator-display-props nil)
+  ;;
+  ;; This workaround still doesn’t work all the time, and the problem
+  ;; can be avoided by simply not using the display property ofr
+  ;; markdown prettifier and rather use (:extend t) face attribute.
+  ;; But let’s keep the comment in case someone does something similar
+  ;; in the future.
 
   (let* ((parent-frame (frame-parent frame))
          (size
@@ -551,10 +555,6 @@ FRAME is the childframe, WINDOW is the primary window."
          (frame-resize-pixelwise t)
          (pos (funcall eldoc-box-position-function width height)))
     (set-frame-size frame width height t)
-
-    ;; Set the display property back.
-    (setcdr eldoc-box--markdown-separator-display-props
-            '(:width text))
 
     ;; move position
     (set-frame-position frame (car pos) (cdr pos))))
@@ -847,11 +847,15 @@ childframe."
     (goto-char (point-min))
     (let (prop)
       (while (setq prop (text-property-search-forward 'markdown-hr))
-        (add-text-properties
-         (prop-match-beginning prop)
-         (prop-match-end prop)
-         `( display ,eldoc-box--markdown-separator-display-props
-            face eldoc-box-markdown-separator))))))
+        (let* ((beg (prop-match-beginning prop))
+               (end (prop-match-end prop))
+               (end-plus-newline
+                (save-excursion
+                  (goto-char end)
+                  (min (1+ (line-end-position)) (point-max)))))
+          (add-text-properties beg end '(display " "))
+          (add-text-properties beg end-plus-newline
+                               '(face eldoc-box-markdown-separator)))))))
 
 (defun eldoc-box--replace-en-space ()
   "Display the en spaces in documentation as regular spaces."
