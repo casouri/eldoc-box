@@ -528,7 +528,8 @@ FRAME is the childframe, WINDOW is the primary window."
   ;; before calling ‘window-text-pixel-size’, and set them back after.
   (setcdr eldoc-box--markdown-separator-display-props nil)
 
-  (let* ((size
+  (let* ((parent-frame (frame-parent frame))
+         (size
           (window-text-pixel-size
            window nil nil
            (if (functionp eldoc-box-max-pixel-width) (funcall eldoc-box-max-pixel-width) eldoc-box-max-pixel-width)
@@ -537,6 +538,16 @@ FRAME is the childframe, WINDOW is the primary window."
          (width (car size))
          (height (cdr size))
          (width (+ width (frame-char-width frame))) ; add margin
+         ;; On non-mac systems, childframe outside of the parent frame
+         ;; is clipped.
+         (width (if (eq (window-system) 'ns)
+                    width
+                  (min width (- (frame-pixel-width parent-frame)
+                                32)))) ; Some buffer.
+         (height (if (eq (window-system) 'ns)
+                     height
+                   (min height (- (frame-pixel-height parent-frame)
+                                  32))))
          (frame-resize-pixelwise t)
          (pos (funcall eldoc-box-position-function width height)))
     (set-frame-size frame width height t)
