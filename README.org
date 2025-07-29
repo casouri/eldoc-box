@@ -43,6 +43,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 - =eldoc-box-self-insert-command-list= :: By default =eldoc-box-hover-at-point-mode= only keeps childframe display while you are typing (ie, when =this-command= is =self-insert-command=). But if you bind something else to your keys, eldoc-box can’t recognize it and will hide childframe when you type. Add your command to this list so eldoc-box won’t hide childframe when this command is called.
 - =eldoc-box-lighter= :: Lighter displayed on the mode line.
 - =eldoc-box-buffer-setup-function= :: A function that runs in eldoc-box doc buffer for setup. See docstring for more information.
+- =eldoc-box-hover-display-frame-above-point= :: If non-nil, eldoc-box tries to display the at-point childframe above the point, instead of below.
 
 ** Use with eglot
 
