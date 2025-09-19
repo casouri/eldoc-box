@@ -872,10 +872,13 @@ already a previous documentation box active."
 		 (buffer (window-buffer window)))
 	  (when (buffer-local-value 'eldoc-box-mouse-mode buffer)
 		(setq eldoc-box--mouse-location (cons window pos))
-		(save-excursion
-		  (set-buffer buffer)
-		  (goto-char pos)
-		  (when (not (eolp)) (eldoc-print-current-symbol-info)))))))
+        (with-current-buffer buffer
+          (save-excursion
+		    (goto-char pos)
+            ;; We can’t override the display function here like we
+            ;; do in ‘eldoc-box-help-at-point’, because eldoc doc
+            ;; function might by async.
+		    (when (not (eolp)) (eldoc-print-current-symbol-info))))))))
 
 (defun eldoc-box--mouse-still-hovering-p ()
   "Returns non-nil if mouse is still hovering at the same position.
@@ -894,9 +897,7 @@ This is used for deciding whether to keep showing the doc childframe."
 	 ((eldoc-box--pos-in-frame-p xy))
      ;; Keep the frame if mouse still points to the same position.
 	 ((buffer-local-value 'eldoc-box-mouse-mode buffer)
-	  (eq eldoc-box--last-point pos))
-     ;; FIXME: Do we need this condition? What is it for? --yuan
-	 ((eq buffer (get-buffer eldoc-box--buffer))))))
+	  (eq eldoc-box--last-point pos)))))
 
 (defun eldoc-box--mouse-enable ()
   "Enable eldoc-box-mouse.
