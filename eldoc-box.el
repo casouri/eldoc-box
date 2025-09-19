@@ -189,6 +189,12 @@ If non-nil, in ‘eldoc-box-hover-at-point-mode’, the childframe is
 displayed above point rather than below it."
   :type 'boolean)
 
+(defcustom eldoc-box-mouse-mode-idle-delay 0.3
+  "Seconds to wait before showing doc at mouse point.
+
+This only applies to ‘eldoc-box-mouse-mode’."
+  :type 'number)
+
 (defvar eldoc-box-position-function #'eldoc-box--default-upper-corner-position-function
   "Eldoc-box uses this function to set childframe's position.
 
@@ -302,13 +308,13 @@ Intended for internal use."
     (delete-frame eldoc-box--frame)
     (setq eldoc-box--frame nil)))
 
-(defun eldoc-box--box? ()
+(defun eldoc-box--frame-visible-p ()
   "Returns t when the childframe is visible."
   (and
    eldoc-box--frame
    (frame-visible-p eldoc-box--frame)))
 
-(defun eldoc-box--pixels-in-box? (pos)
+(defun eldoc-box--pos-in-frame-p (pos)
   "Returns t if pixel POS (x . y) lies within the childframe."
   (let*
 	  ((box eldoc-box--frame)
@@ -317,13 +323,15 @@ Intended for internal use."
 	   (box-y (cdr box-pos)))
 	(and
 	 (<= box-x (car pos) (+ box-x (frame-pixel-width box)))
-	 (<= box-y (cdr pos) (+ box-y (frame-pixel-height box)))
-	 )))
+	 (<= box-y (cdr pos) (+ box-y (frame-pixel-height box))))))
 
 (defun eldoc-box--mouse-on-idle ()
-  "Triggers documetation display if mouse is currently hovering over a valid `eldoc-box-mouse-mode' position.
-Only triggers if there is not already a previous documentation box active."
-  (when (not (eldoc-box--box?))
+  "Triggers documetation display for mouse-pointed text.
+
+But only if mouse is currently hovering over a valid
+`eldoc-box-mouse-mode' position. And only triggers if there is not
+already a previous documentation box active."
+  (when (not (eldoc-box--frame-visible-p))
 	(when-let*
 		((mouse-pos (mouse-pixel-position))
 		 (frame (car mouse-pos))
@@ -331,8 +339,7 @@ Only triggers if there is not already a previous documentation box active."
 		 (info (posn-at-x-y (car xy) (cdr xy) frame))
 		 (window (nth 0 info))
 		 (pos (nth 5 info))
-		 (buffer (window-buffer window))
-		 )
+		 (buffer (window-buffer window)))
 	  (when (buffer-local-value 'eldoc-box-mouse-mode buffer)
 		(setq eldoc-box--mouse-location (cons window pos))
 		(save-excursion
@@ -340,9 +347,10 @@ Only triggers if there is not already a previous documentation box active."
 		  (goto-char pos)
 		  (when (not (eolp)) (eldoc-print-current-symbol-info)))))))
 
+(defun eldoc-box--mouse-still-hovering-p ()
+  "Returns non-nil if mouse is still hovering at the same position.
 
-(defun eldoc-box--mouse-hovering? ()
-  "Returns non-nil if mouse is still hovering after `eldoc-box--mouse-on-idle' triggered."
+This is used for deciding whether to keep showing the doc childframe."
   (let*
 	  ((mouse-pos (mouse-pixel-position))
 	   (frame (car mouse-pos))
@@ -350,25 +358,27 @@ Only triggers if there is not already a previous documentation box active."
 	   (info (posn-at-x-y (car xy) (cdr xy) frame))
 	   (window (nth 0 info))
 	   (pos (nth 5 info))
-	   (buffer (window-buffer window))
-	   )
+	   (buffer (window-buffer window)))
 	(cond
-	 ((eldoc-box--pixels-in-box? xy))
+     ;; Keep the frame if mouse pointer is in it.
+	 ((eldoc-box--pos-in-frame-p xy))
+     ;; Keep the frame if mouse still points to the same position.
 	 ((buffer-local-value 'eldoc-box-mouse-mode buffer)
 	  (eq eldoc-box--last-point pos))
+     ;; FIXME: Do we need this condition? What is it for? --yuan
 	 ((eq buffer (get-buffer eldoc-box--buffer))))))
 
 (defun eldoc-box--mouse-enable ()
   "Enable eldoc-box-mouse.
 Intended for internal use."
-  (unless eldoc-box-mouse-support-mode
-	(eldoc-box-mouse-support-mode 1))
+  (unless eldoc-box--mouse-support-mode
+	(eldoc-box--mouse-support-mode 1))
   (when eldoc-mode
 	(setq-local eldoc-box--old-eldoc-mode t)
 	(eldoc-mode -1))
   (when eldoc-box-hover-mode
 	(eldoc-box-hover-mode -1))
-  (when eldoc-box-hover-at-point-mode-hook
+  (when eldoc-box-hover-at-point-mode
 	(eldoc-box-hover-at-point-mode -1))
   (setq-local eldoc-box-position-function eldoc-box-at-point-position-function)
   (eldoc-box--enable)
@@ -391,21 +401,20 @@ Intended for internal use."
 
 (defun eldoc-box--mouse-display-function (docs interactive)
   "Display DOCS in childframe.
-For DOCS and INTERACTIVE see ‘eldoc-display-functions’. Maybe
-display the docs in echo area depending on
-‘eldoc-box-only-multi-line’."
+
+For DOCS and INTERACTIVE see ‘eldoc-display-functions’. Optionally
+display the docs in echo area depending on ‘eldoc-box-only-multi-line’."
   (let ((doc (string-trim (string-join
                            (mapcar #'eldoc-box--compose-doc docs)
                            eldoc-box-doc-separator))))
 	(save-window-excursion
 	  (when eldoc-box--mouse-location
-		  (progn
-			(select-window (car eldoc-box--mouse-location) t)
-			(save-excursion
-			  (goto-char (cdr eldoc-box--mouse-location))
-			  (when (eldoc-box--eldoc-message-function "%s" doc)
-				(eldoc-display-in-echo-area docs interactive))))
-		))))
+		(progn
+		  (select-window (car eldoc-box--mouse-location) t)
+		  (save-excursion
+			(goto-char (cdr eldoc-box--mouse-location))
+			(when (eldoc-box--eldoc-message-function "%s" doc)
+			  (eldoc-display-in-echo-area docs interactive))))))))
 
 ;;;;; Commands
 
@@ -485,10 +494,13 @@ For DOCS, see ‘eldoc-display-functions’."
   "The idle timer to trigger display on mouse hover.")
 
 (defvar eldoc-box--mouse-location nil
-  "The mouse location to display documentation for.")
+  "The mouse location to display documentation at.
+The value should be a cons (WINDOW . POS), where POS is buffer position.")
 
 (defvar eldoc-box--old-track-mouse nil
-  "The original value of `track-mouse' before enabling `eldoc-box-mouse-support-mode'")
+  "The original value of `track-mouse'.
+
+Value before enabling `eldoc-box--mouse-support-mode'")
 
 (defvar-local eldoc-box--old-eldoc-mode nil
   "The original value of `eldoc-mode' before enabling `eldoc-box-mouse-mode'")
@@ -610,12 +622,12 @@ WINDOW nil means use selected window."
                 ;; normal, just return y - height
                 (- y height))
             (if (< (- (frame-inner-height) height) y)
-              ;; space under the pos is not enough
-              ;; put above
-              (max 0 (- y height))
-            ;; normal, just return y + em
-            (+ y em)))
-	  )))
+                ;; space under the pos is not enough
+                ;; put above
+                (max 0 (- y height))
+              ;; normal, just return y + em
+              (+ y em)))
+	      )))
 
 (defun eldoc-box--default-at-point-position-function (width height)
   "Set `eldoc-box-position-function' to this function.
@@ -760,7 +772,7 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                     (not (eq (point) eldoc-box--last-point)) ; 2
                     (not (eq (current-buffer) (get-buffer eldoc-box--buffer)))) ; 3
                (not (or eldoc-box-hover-mode eldoc-box-hover-at-point-mode))) ; 4
-		   (not (eldoc-box--mouse-hovering?))) ; 5
+		   (not (eldoc-box--mouse-still-hovering-p))) ; 5
       ;; 1. Obviously, last-message nil means we are not on a valid symbol anymore.
       ;; 2. Or are we? If you scroll the childframe with mouse wheel
       ;; `eldoc-pre-command-refresh-echo-area' will set `eldoc-last-message' to nil.
@@ -906,19 +918,19 @@ You can use \\[keyboard-quit] to hide the doc."
     (kill-local-variable 'eldoc-box-clear-with-C-g)))
 
 ;;;###autoload
-(define-minor-mode eldoc-box-mouse-support-mode
+(define-minor-mode eldoc-box--mouse-support-mode
   "Global functionality required for `eldoc-box-mouse-mode'."
   :lighter eldoc-box-lighter
   :global t
-  (if eldoc-box-mouse-support-mode
+  (if eldoc-box--mouse-support-mode
 	  (progn
 		(setq eldoc-box--old-track-mouse track-mouse)
 		(unless track-mouse
 		  (setq track-mouse t))
 		(unless eldoc-box--mouse-timer
 		  (setq eldoc-box--mouse-timer
-				(run-with-idle-timer 1 t  'eldoc-box--mouse-on-idle)))
-		)
+				(run-with-idle-timer eldoc-box-mouse-mode-idle-delay
+                                     t  'eldoc-box--mouse-on-idle))))
 	(cancel-timer eldoc-box--mouse-timer)
 	(setq eldoc-box--mouse-timer nil)
 	(setq eldoc-box--mouse-location nil)
