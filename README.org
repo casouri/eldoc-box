@@ -20,9 +20,18 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 *Note:* If you use Gnome and Emacs 27, set ~x-gtk-resize-child-frames~ to ~resize-mode~ to avoid breakage of childframe.
 
 ** Function
+
+*Minor modes*
+
 - =eldoc-box-hover-mode= :: Enables a minor mode that displays documentation of the symbol at point in a childframe on upper corner.
 - =eldoc-box-hover-at-point-mode= :: Same as =eldoc-box-hover-mode= except the childframe is displayed at point, instead of on the upper corner. /Note that this mode brings a small but noticeable slow-down./
-- =eldoc-box-help-at-point= :: Display the documentation of the symbol at point in a temporary childframe, moving point or typing =C-g= disposes the childframe. This command simply displays what would be displayed by =eldoc-doc-buffer= in a childframe, so it requires Emacs 28, and  =eldoc-box-hover-mode= doesn’t need to be on for this command to work.
+- =eldoc-box-mouse-mode= :: Instead of showing doc at point, show doc at mouse pointer. /This mode needs to enable =track-mouse=, which might slow down Emacs./
+
+Only one of these modes can be enabled at a time.
+
+*Commands*
+
+- =eldoc-box-help-at-point= :: Display the documentation of the symbol at point in a temporary childframe, moving point or typing =C-g= disposes the childframe. Requires Emacs 28. The minor modes don’t need to be enabled for this command to work.
 - =eldoc-box-scroll-up/down= :: scrolls the childframe up/down.
 
 ** Face
@@ -44,6 +53,7 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 - =eldoc-box-lighter= :: Lighter displayed on the mode line.
 - =eldoc-box-buffer-setup-function= :: A function that runs in eldoc-box doc buffer for setup. See docstring for more information.
 - =eldoc-box-hover-display-frame-above-point= :: If non-nil, eldoc-box tries to display the at-point childframe above the point, instead of below.
+- =eldoc-box-mouse-mode-idle-delay= :: Time to wait until showing the doc in =eldoc-box-mouse-mode=.
 
 ** Use with eglot
 
