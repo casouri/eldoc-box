@@ -657,9 +657,9 @@ FRAME is the childframe, WINDOW is the primary window."
   "Make childframe follow cursor in at-point mode."
   (unless eldoc-box--inhibit-childframe
     (if (member this-command eldoc-box-self-insert-command-list)
-        (progn (when (frame-live-p eldoc-box--frame)
-                 (eldoc-box--update-childframe-geometry
-                  eldoc-box--frame (frame-selected-window eldoc-box--frame))))
+        (when (eldoc-box--frame-visible-p)
+          (eldoc-box--update-childframe-geometry
+           eldoc-box--frame (frame-selected-window eldoc-box--frame)))
       ;; if not typing, inhibit display
       (eldoc-box--inhibit-childframe-for 0.5))))
 
