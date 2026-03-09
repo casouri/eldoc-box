@@ -34,7 +34,7 @@ Only one of these modes can be enabled at a time.
 *Commands*
 
 - =eldoc-box-help-at-point= :: Display the documentation of the symbol at point in a temporary childframe, moving point or typing =C-g= (=eldoc-box-clear-with-C-g=) disposes the childframe. Requires Emacs 28. The minor modes don’t need to be enabled for this command to work. Invoking =eldoc-box-help-at-point= again while childframe is visible switches focus to the childfame, after that press =q= to quit the childframe.
-- =eldoc-box-scroll-up/down= :: scrolls the childframe up/down.
+- =eldoc-box-scroll-up/down= :: Scrolls the childframe up/down.
 
 ** Face
 - =eldoc-box-border= :: Adjust =:background= of this face for border color.
