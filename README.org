@@ -19,6 +19,8 @@ It is also available on [[https://melpa.org/#/eldoc-box][MELPA]].
 * Usage
 *Note:* If you use Gnome and Emacs 27, set ~x-gtk-resize-child-frames~ to ~resize-mode~ to avoid breakage of childframe.
 
+There are primarily two ways of using this package. You can bind =eldoc-box-help-at-point= to a key and type that key to show documentation on-demand at point, or you can enable one of the minor modes which shows documentation automatically when you move the point around.
+
 ** Function
 
 *Minor modes*
@@ -31,13 +33,13 @@ Only one of these modes can be enabled at a time.
 
 *Commands*
 
-- =eldoc-box-help-at-point= :: Display the documentation of the symbol at point in a temporary childframe, moving point or typing =C-g= disposes the childframe. Requires Emacs 28. The minor modes don’t need to be enabled for this command to work.
+- =eldoc-box-help-at-point= :: Display the documentation of the symbol at point in a temporary childframe, moving point or typing =C-g= (=eldoc-box-clear-with-C-g=) disposes the childframe. Requires Emacs 28. The minor modes don’t need to be enabled for this command to work. Invoking =eldoc-box-help-at-point= again while childframe is visible switches focus to the childfame, after that press =q= to quit the childframe.
 - =eldoc-box-scroll-up/down= :: scrolls the childframe up/down.
 
 ** Face
 - =eldoc-box-border= :: Adjust =:background= of this face for border color.
 - =eldoc-box-body= :: Default face used by childframe.  I suggest to use a nice sans serif font.
-- =eldoc-box-markdown-separator=: Face for the separator line (=<br>=) in Markdown documentation.
+- =eldoc-box-markdown-separator= :: Face for the separator line (=<br>=) in Markdown documentation.
 
 ** Hooks
 - =eldoc-box-buffer-hook= :: A hook that runs after buffer for doc is setup. Run inside the new buffer every time before the new documentation is displayed.
