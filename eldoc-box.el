@@ -265,9 +265,19 @@ See `eldoc-box-inhibit-display-when-moving'."
 (defun eldoc-box-quit-frame ()
   "Hide documentation childframe."
   (interactive)
-  (when (and eldoc-box--frame (frame-live-p eldoc-box--frame))
+  (when (eldoc-box--frame-visible-p)
     (eldoc-box-unfocus-frame)
     (make-frame-invisible eldoc-box--frame t)))
+
+(defun eldoc-box--quit-frame-not-in-childframe ()
+  "Hide documentation childframe.
+But not if point is in the childframe. If user uses
+‘eldoc-box-focus-frame’ to switch to the childframe, we don’t want C-g
+to close the frame when the user meant to use C-g to cancel the region
+in the childframe."
+  (interactive)
+  (when (not (eq (selected-frame) eldoc-box--frame))
+    (eldoc-box-quit-frame)))
 
 (defvar-local eldoc-box--old-eldoc-functions nil
   "The original value of ‘eldoc-display-functions’.
@@ -422,7 +432,7 @@ For DOCS, see ‘eldoc-display-functions’."
       (setq eldoc-box--help-at-point-last-point (point))
       (run-with-timer 0.1 nil #'eldoc-box--help-at-point-cleanup)
       (when eldoc-box-clear-with-C-g
-        (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame))))))
+        (advice-add #'keyboard-quit :before #'eldoc-box--quit-frame-not-in-childframe))))))
 
 ;;;; Backstage
 ;;;;; Variable
