@@ -276,7 +276,8 @@ But not if point is in the childframe. If user uses
 to close the frame when the user meant to use C-g to cancel the region
 in the childframe."
   (interactive)
-  (when (not (eq (selected-frame) eldoc-box--frame))
+  (when (and eldoc-box-clear-with-C-g
+             (not (eq (selected-frame) eldoc-box--frame)))
     (eldoc-box-quit-frame)))
 
 (defvar-local eldoc-box--old-eldoc-functions nil
