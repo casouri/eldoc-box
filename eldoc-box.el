@@ -135,9 +135,8 @@ This separator is used for the documentation shown in
     (width  . 0)
     (height  . 0)
 
-    ;; Allow childframe to be focused
-    ;; (no-accept-focus . t)
-    ;; (no-focus-on-map . t)
+    (no-accept-focus . t)
+    (no-focus-on-map . t)
     (min-width  . 0)
     (min-height  . 0)
     (internal-border-width . 1)
@@ -299,7 +298,7 @@ Intended for internal use."
                             eldoc-display-functions))))
 
   (when eldoc-box-clear-with-C-g
-    (advice-add #'keyboard-quit :before #'eldoc-box-quit-frame)))
+    (advice-add #'keyboard-quit :before #'eldoc-box--quit-frame-not-in-childframe)))
 
 (defun eldoc-box--disable ()
   "Disable eldoc-box hover.
@@ -318,7 +317,7 @@ Intended for internal use."
                   (cons 'eldoc-display-in-echo-area
                         eldoc-display-functions))))
 
-  (advice-remove #'keyboard-quit #'eldoc-box-quit-frame)
+  (advice-remove #'keyboard-quit #'eldoc-box--quit-frame-not-in-childframe)
   ;; If minor mode is turned off when the childframe is visible, hide it.
   (when eldoc-box--frame
     (delete-frame eldoc-box--frame)
@@ -397,6 +396,8 @@ For DOCS, see ‘eldoc-display-functions’."
   (interactive)
   (when (eldoc-box--frame-visible-p)
     (setq eldoc-box--main-frame (selected-frame))
+    (set-frame-parameter eldoc-box--frame 'no-accept-focus nil)
+    (set-frame-parameter eldoc-box--frame 'no-focus-on-map nil)
     (select-frame-set-input-focus eldoc-box--frame)
     (setq cursor-type 'bar)
     (local-set-key (kbd "q") #'eldoc-box-quit-frame)))
@@ -408,7 +409,9 @@ For DOCS, see ‘eldoc-display-functions’."
     (setq cursor-type nil)
     (when (and eldoc-box--main-frame
                (frame-live-p eldoc-box--main-frame))
-      (select-frame-set-input-focus eldoc-box--main-frame))))
+      (select-frame-set-input-focus eldoc-box--main-frame)
+      (set-frame-parameter eldoc-box--frame 'no-accept-focus t)
+      (set-frame-parameter eldoc-box--frame 'no-focus-on-map t))))
 
 ;;;###autoload
 (defun eldoc-box-help-at-point ()
