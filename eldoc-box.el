@@ -617,7 +617,10 @@ FRAME is the childframe, WINDOW is the primary window."
   ;; But let’s keep the comment in case someone does something similar
   ;; in the future.
 
-  (let* ((parent-frame (frame-parent frame))
+  ;; Let-bind alter-fullscreen-frame to nil so we can always resize
+  ;; frame on macOS (see issue#141).
+  (let* ((alter-fullscreen-frame nil)
+         (parent-frame (frame-parent frame))
          (size
           (window-text-pixel-size
            window nil nil
