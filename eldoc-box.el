@@ -684,7 +684,9 @@ Checkout `lsp-ui-doc--make-frame', `lsp-ui-doc--move-frame'."
                  (set-frame-parameter frame 'parent-frame main-frame))
         (setq window (display-buffer-in-child-frame
                       buffer
-                      `((child-frame-parameters . ,parameter))))
+                      `((child-frame-parameters . ,parameter)
+                        (no-other-window . t)
+                        (no-delete-other-windows . t))))
         (setq frame (window-frame window)))
       ;; workaround
       ;; (set-frame-parameter frame 'left-fringe (alist-get 'left-fringe eldoc-box-frame-parameters))
