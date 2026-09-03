@@ -134,6 +134,7 @@ This separator is used for the documentation shown in
     (top . -1)
     (width  . 0)
     (height  . 0)
+    (fullscreen . nil)
 
     (no-accept-focus . t)
     (no-focus-on-map . t)
