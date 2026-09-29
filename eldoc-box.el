@@ -905,7 +905,7 @@ The position of childframe is at mouse position."
 ;;;; Mouse mode
 
 (defun eldoc-box--mouse-on-idle ()
-  "Triggers documetation display for mouse-pointed text.
+  "Triggers documentation display for mouse-pointed text.
 
 But only if mouse is currently hovering over a valid
 `eldoc-box-mouse-mode' position. And only triggers if there is not
